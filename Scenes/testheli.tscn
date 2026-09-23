@@ -6,16 +6,13 @@
 [ext_resource type="PackedScene" uid="uid://caunffqn21xq8" path="res://Assets/Models/Blackhawk/BlackhawkV2.glb" id="4_etpvc"]
 [ext_resource type="Script" uid="uid://mfns2wsno061" path="res://Resources/Scripts/HelicopterRotors.gd" id="5_34h5m"]
 [ext_resource type="Script" uid="uid://cpnipnsu1dldg" path="res://Scenes/passengerhandler.gd" id="6_sq5nx"]
+[ext_resource type="PackedScene" uid="uid://b8e5eya8fgpm2" path="res://Scenes/loading_trigger.tscn" id="7_y27xj"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
 size = Vector3(5.9064636, 5.1016846, 25.402832)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_34h5m"]
 size = Vector3(97.74725, 150.09035, 284.86377)
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_g4v7s"]
-height = 10.213379
-radius = 32.42383
 
 [node name="TestHelicopter" type="RigidBody3D" unique_id=753352377]
 mass = 5000.0
@@ -113,11 +110,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.985138, 118.94001, 333.53
 [node name="ChairNPCSpot15" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1913422623]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.92365, 118.94001, 333.533)
 
-[node name="LoadingTrigger" type="Area3D" parent="." unique_id=2080422179]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LoadingTrigger" unique_id=519770699]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1066895, 0)
-shape = SubResource("CylinderShape3D_g4v7s")
+[node name="LoadingTrigger" parent="." unique_id=707622379 instance=ExtResource("7_y27xj")]
+passenger_handler_path = NodePath("../BlackhawkV2/PassengerHandler")
 
 [connection signal="body_entered" from="BlackhawkV2/NPCLoadingAreaLeft" to="BlackhawkV2/PassengerHandler" method="_on_npc_loading_area_left_body_entered"]
 
