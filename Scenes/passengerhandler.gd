@@ -29,7 +29,6 @@ func vacate_seat(seat_name: String) -> void:
 		seats[seat_name]["occupant"] = null
 		seats[seat_name]["occupied"] = false
 
-#
 
 func _on_npc_loading_area_left_body_entered(body: Node3D) -> void:
 	if body is FriendlyTroop:
