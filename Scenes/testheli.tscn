@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://drhlkodki1tpi"]
+
+[ext_resource type="Script" uid="uid://boasf6kmn2875" path="res://Scenes/testheli.gd" id="1_m8arb"]
+[ext_resource type="Script" uid="uid://cegpwfyueige2" path="res://Scenes/CameraOrbit.gd" id="2_p7jay"]
+[ext_resource type="Script" uid="uid://drkvqxjmai3qg" path="res://Levels/debugInfo.gd" id="3_axm6r"]
+[ext_resource type="PackedScene" uid="uid://caunffqn21xq8" path="res://Assets/Models/Blackhawk/BlackhawkV2.glb" id="4_etpvc"]
+[ext_resource type="Script" uid="uid://mfns2wsno061" path="res://Resources/Scripts/HelicopterRotors.gd" id="5_34h5m"]
+[ext_resource type="Script" uid="uid://cpnipnsu1dldg" path="res://Scenes/passengerhandler.gd" id="6_sq5nx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
+size = Vector3(5.9064636, 5.1016846, 25.402832)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_34h5m"]
+size = Vector3(97.74725, 150.09035, 284.86377)
+
+[node name="TestHelicopter" type="RigidBody3D" unique_id=753352377]
+mass = 5000.0
+can_sleep = false
+script = ExtResource("1_m8arb")
+collective_max_force = 1.3
+collective_idle = 0.75
+cyclic_pitch_strength = 10.0
+cyclic_roll_strength = 1.25
+antitorque_strength = 10.0
+hover_stability_strength = 0.1
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1881279923]
+transform = Transform3D(-1, 2.0813246e-08, -8.4909075e-08, 0, 0.9712466, 0.2380758, 8.742278e-08, 0.2380758, -0.9712466, 0.03514242, 8.594946, -17.02816)
+fov = 80.0
+script = ExtResource("2_p7jay")
+orbit_distance = 18.0
+
+[node name="TestHud" type="Control" parent="." unique_id=652498144]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="TestHud" unique_id=52688439]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+fit_content = true
+script = ExtResource("3_axm6r")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=982059199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.081222534, 2.5816295, 0.068481445)
+shape = SubResource("BoxShape3D_etpvc")
+
+[node name="BlackhawkV2" parent="." unique_id=1189646811 instance=ExtResource("4_etpvc")]
+transform = Transform3D(0.015, 0, 0, 0, 0.015, 0, 0, 0, 0.015, 0, 0, 0)
+script = ExtResource("5_34h5m")
+
+[node name="NPCLoadingAreaLeft" type="Area3D" parent="BlackhawkV2" unique_id=308912195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 183.17627, 156.20442, 282.95203)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlackhawkV2/NPCLoadingAreaLeft" unique_id=586091946]
+shape = SubResource("BoxShape3D_34h5m")
+
+[node name="PassengerHandler" type="Node3D" parent="BlackhawkV2" unique_id=385073281]
+script = ExtResource("6_sq5nx")
+
+[node name="ChairNPCSpot1" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1001074232]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.333145, 118.939964, 165.9847)
+
+[node name="ChairNPCSpot2" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=373787572]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.085342, 118.93997, 165.98471)
+
+[node name="ChairNPCSpot3" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1880218891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4493656, 118.93998, 165.98473)
+
+[node name="ChairNPCSpot4" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1261442211]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.145405, 118.93999, 165.98474)
+
+[node name="ChairNPCSpot5" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=195026181]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -91.214294, 118.94, 165.98477)
+
+[node name="ChairNPCSpot6" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1164008924]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -91.214294, 118.94001, 267.1727)
+
+[node name="ChairNPCSpot7" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=845308309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.56468, 118.94001, 267.1727)
+
+[node name="ChairNPCSpot8" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1934116223]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.330276, 118.94001, 267.1727)
+
+[node name="ChairNPCSpot9" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=502914403]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.12865, 118.94001, 267.1727)
+
+[node name="ChairNPCSpot10" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1336787894]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.13617, 118.94001, 267.1727)
+
+[node name="ChairNPCSpot11" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=2060033126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.13617, 118.94001, 333.533)
+
+[node name="ChairNPCSpot12" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=295038922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.989273, 118.94001, 333.533)
+
+[node name="ChairNPCSpot13" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1280058273]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36339766, 118.94001, 333.533)
+
+[node name="ChairNPCSpot14" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1340030389]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.985138, 118.94001, 333.533)
+
+[node name="ChairNPCSpot15" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1913422623]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.92365, 118.94001, 333.533)
+
+[connection signal="body_entered" from="BlackhawkV2/NPCLoadingAreaLeft" to="BlackhawkV2/PassengerHandler" method="_on_npc_loading_area_left_body_entered"]
+
+[editable path="BlackhawkV2"]

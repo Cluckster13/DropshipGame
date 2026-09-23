@@ -1,0 +1,14 @@
+Node3D
+NavigationAgent3D
+MeshInstance3D
+CollisionShape3D
+RigidBody3D
+Area3D
+DirectionalLight3D
+RichTextLabel
+Label
+Control
+CSGSphere3D
+CSGCylinder3D
+CSGBox3D
+Camera3D

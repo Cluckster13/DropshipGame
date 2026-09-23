@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://rek1t631f3la"]
+
+[ext_resource type="Script" uid="uid://bhvxeulm8b5ac" path="res://Scenes/friendly_troop.gd" id="1_mb0wo"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
+size = Vector3(0.38964844, 0.2624054, 0.34228516)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q5w1q"]
+albedo_color = Color(0, 0, 1, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_q5w1q"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_mb0wo"]
+
+[node name="FriendlyTroop" type="RigidBody3D" unique_id=892431120]
+script = ExtResource("1_mb0wo")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1290880233]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.62394285, 0.43799043)
+mesh = SubResource("BoxMesh_g4v7s")
+surface_material_override/0 = SubResource("StandardMaterial3D_q5w1q")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=789401572]
+shape = SubResource("CapsuleShape3D_q5w1q")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1620613639]
+mesh = SubResource("CapsuleMesh_mb0wo")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1327080631]
