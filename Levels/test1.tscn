@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://b64yawsoxkdqf" path="res://Assets/Dev/Orange/texture_09.png" id="1_3mpq8"]
 [ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
+[ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/FriendlyTroop.tscn" id="3_8nb80"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8nb80"]
 albedo_texture = ExtResource("1_3mpq8")
@@ -20,3 +21,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8278236, 2.580696, -0.5072
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=447569339]
 transform = Transform3D(1, 0, 0, 0, 0.8957118, 0.44463518, 0, -0.44463518, 0.8957118, 0, 0, 0)
+
+[node name="FriendlyTroop" parent="." unique_id=892431120 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 6.375099)
+
+[node name="FriendlyTroop2" parent="." unique_id=901558281 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 2.3938663)
+
+[node name="FriendlyTroop3" parent="." unique_id=274008195 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 4.2539034)
+
+[node name="FriendlyTroop4" parent="." unique_id=877031065 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 6.346988)
+
+[node name="FriendlyTroop5" parent="." unique_id=1422164345 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 4.542197)
+
+[node name="FriendlyTroop6" parent="." unique_id=757641191 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 2.6696253)

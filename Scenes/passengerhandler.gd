@@ -33,6 +33,8 @@ func vacate_seat(seat_name: String) -> void:
 
 func _on_npc_loading_area_left_body_entered(body: Node3D) -> void:
 	if body is FriendlyTroop:
+		if body.state == FriendlyTroop.States.PASSENGER:
+			return
 		var seat_name: String = get_free_seat()
 		if seat_name != "":
 			if assign_seat(seat_name, body):
