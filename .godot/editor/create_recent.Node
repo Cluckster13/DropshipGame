@@ -1,10 +1,10 @@
 NavigationAgent3D
-NavigationRegion3D
-CharacterBody3D
 CollisionShape3D
+MeshInstance3D
+CharacterBody3D
+NavigationRegion3D
 Area3D
 Node3D
-MeshInstance3D
 RigidBody3D
 DirectionalLight3D
 RichTextLabel

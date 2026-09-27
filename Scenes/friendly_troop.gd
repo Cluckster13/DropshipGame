@@ -7,6 +7,14 @@ var state: States = States.IDLE
 @export var move_speed       : float = 15
 @export var arrival_distance : float = 1.0
 
+var acceleration_enabled : bool = true
+var target_velocity : Vector3 = Vector3.ZERO
+var current_lerp_velocity : Vector3 = Vector3.ZERO
+var current_movement_speed : float = 4.0
+var current_acceleration_multiplier : float = 14
+var current_movement_speed_divisor : float = 1
+var direction : Vector3 = Vector3.ZERO
+
 var seat_marker        : Node3D = null
 var assigned_seat_name : String = ""
 var passenger_handler  : PassengerHandler = null
@@ -16,18 +24,19 @@ var _gravity : float = ProjectSettings.get_setting("physics/3d/default_gravity",
 @onready var nav: NavigationAgent3D = $NavigationAgent3D
 
 func _ready() -> void:
-	nav.path_desired_distance   = 0.5
+	nav.path_desired_distance = 0.5
 	nav.target_desired_distance = arrival_distance
+	nav.path_max_distance = 100.0
 
 func _physics_process(delta: float) -> void:
 	match state:
 		States.PASSENGER:
 			_snap_to_seat()
 		States.MOVING_TO_BOARD:
-			_move_along_nav(delta)
-			print("moving to board")
+			direction = owner.global_position.direction_to(nav.target_position)
 		States.IDLE:
-			_apply_gravity_only(delta)
+			pass
+	_calculate_velocity(delta)
 
 func _apply_gravity_only(delta: float) -> void:
 	if not is_on_floor():
@@ -38,38 +47,54 @@ func _apply_gravity_only(delta: float) -> void:
 	velocity.z = 0.0
 	move_and_slide()
 
-func _move_along_nav(delta: float) -> void:
-	if not is_on_floor():
-		velocity.y -= _gravity * delta
-	else:
-		velocity.y = 0.0
 
-	if nav.is_navigation_finished():
-		velocity.x = 0.0
-		velocity.z = 0.0
-		move_and_slide()
-		_on_arrived()
+func _calculate_velocity(delta : float) -> void:
+	
+	target_velocity.x = direction.x * (current_movement_speed/current_movement_speed_divisor)
+	target_velocity.z = direction.z * (current_movement_speed/current_movement_speed_divisor)
+	
+	if acceleration_enabled:
+		current_lerp_velocity = current_lerp_velocity.lerp(target_velocity,delta * current_acceleration_multiplier)
+		velocity.x = current_lerp_velocity.x
+		velocity.z = current_lerp_velocity.z
+	else:
+		velocity.x = target_velocity.x
+		velocity.z = target_velocity.z
+
+	if is_on_floor():
 		return
+		
+	_apply_gravity_only(delta)
 
-	var next_pos: Vector3 = nav.get_next_path_position()
-	var direction: Vector3 = global_position.direction_to(next_pos)
-	direction.y = 0.0
+#func _move_along_nav(delta: float) -> void:
+	#if not is_on_floor():
+		#velocity.y -= _gravity * delta
+	#else:
+		#velocity.y = 0.0
 
-	if direction.length_squared() > 0.001:
-		direction = direction.normalized()
+	#var next_pos: Vector3 = nav.get_next_path_position()
+	#var to_next : Vector3 = next_pos - global_position
+	#to_next.y = 0.0
 
-		velocity.x = direction.x * move_speed
-		velocity.z = direction.z * move_speed
+	#var horizontal_dist_to_target := (nav.target_position - global_position)
+	#horizontal_dist_to_target.y = 0.0
 
-		look_at(
-			global_position + direction,
-			Vector3.UP
-		)
-	else:
-		velocity.x = 0.0
-		velocity.z = 0.0
+	#if nav.is_navigation_finished() or horizontal_dist_to_target.length() <= arrival_distance:
+		#velocity.x = 0.0
+		#velocity.z = 0.0
+		#move_and_slide()
+		#_on_arrived()
+		#print("arrived")
+		#return
 
-	move_and_slide()
+
+	#var dir: Vector3 = to_next.normalized()
+	#velocity.x = dir.x * move_speed
+	#velocity.z = dir.z * move_speed
+	#look_at(global_position + dir, Vector3.UP)
+	#print("velocity")
+
+	#move_and_slide()
 
 func _on_arrived() -> void:
 	match state:
@@ -109,7 +134,13 @@ func command_disembark(exit_position: Vector3) -> void:
 	nav.target_position = exit_position
 
 func ai_debug_info() -> Dictionary:
-	return{
-		"State: " : state,
-		"Nav_Target: " : nav.target_position
-		}
+	return {
+		"State": States.keys()[state],
+		"Nav_Target": nav.target_position,
+		"Nav_Finished": nav.is_navigation_finished(),
+		"Next_Path": nav.get_next_path_position(),
+		"Position": global_position,
+		"Velocity": velocity,
+		"On_Floor": is_on_floor(),
+		"Map_Ready": NavigationServer3D.map_get_iteration_id(nav.get_navigation_map()) > 0
+	}
