@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://boasf6kmn2875" path="res://Scenes/testheli.gd" id="1_m8arb"]
 [ext_resource type="Script" uid="uid://cegpwfyueige2" path="res://Scenes/CameraOrbit.gd" id="2_p7jay"]
-[ext_resource type="Script" uid="uid://drkvqxjmai3qg" path="res://Levels/debugInfo.gd" id="3_axm6r"]
 [ext_resource type="PackedScene" uid="uid://caunffqn21xq8" path="res://Assets/Models/Blackhawk/BlackhawkV2.glb" id="4_etpvc"]
 [ext_resource type="Script" uid="uid://mfns2wsno061" path="res://Resources/Scripts/HelicopterRotors.gd" id="5_34h5m"]
 [ext_resource type="Script" uid="uid://cpnipnsu1dldg" path="res://Scenes/passengerhandler.gd" id="6_sq5nx"]
@@ -31,23 +30,6 @@ fov = 80.0
 script = ExtResource("2_p7jay")
 orbit_distance = 18.0
 
-[node name="TestHud" type="Control" parent="." unique_id=652498144]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="RichTextLabel" type="RichTextLabel" parent="TestHud" unique_id=52688439]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-grow_horizontal = 2
-fit_content = true
-script = ExtResource("3_axm6r")
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=982059199]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.081222534, 2.5816295, 0.068481445)
 shape = SubResource("BoxShape3D_etpvc")
@@ -68,8 +50,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171.2692, 156.20442, 282.952
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BlackhawkV2/NPCLoadingAreaRight" unique_id=1235186474]
 shape = SubResource("BoxShape3D_34h5m")
 
-[node name="PassengerHandler" type="Node3D" parent="BlackhawkV2" unique_id=385073281]
+[node name="PassengerHandler" type="Node3D" parent="BlackhawkV2" unique_id=385073281 node_paths=PackedStringArray("left_door", "right_door")]
 script = ExtResource("6_sq5nx")
+left_door = NodePath("../NPCLoadingAreaLeft")
+right_door = NodePath("../NPCLoadingAreaRight")
 
 [node name="ChairNPCSpot1" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1001074232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.333145, 118.939964, 165.9847)
@@ -116,8 +100,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.985138, 118.94001, 333.53
 [node name="ChairNPCSpot15" type="Node3D" parent="BlackhawkV2/PassengerHandler" unique_id=1913422623]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.92365, 118.94001, 333.533)
 
-[node name="LoadingTrigger" parent="." unique_id=707622379 instance=ExtResource("7_y27xj")]
-passenger_handler_path = NodePath("../BlackhawkV2/PassengerHandler")
+[node name="LoadingTrigger" parent="." unique_id=707622379 node_paths=PackedStringArray("passenger_handler", "door") instance=ExtResource("7_y27xj")]
+passenger_handler = NodePath("../BlackhawkV2/PassengerHandler")
+door = NodePath("../BlackhawkV2/NPCLoadingAreaLeft")
 
 [connection signal="body_entered" from="BlackhawkV2/NPCLoadingAreaLeft" to="BlackhawkV2/PassengerHandler" method="_on_npc_loading_area_left_body_entered"]
 [connection signal="body_entered" from="BlackhawkV2/NPCLoadingAreaRight" to="BlackhawkV2/PassengerHandler" method="_on_npc_loading_area_left_body_entered"]

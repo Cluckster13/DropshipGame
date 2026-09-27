@@ -12,7 +12,7 @@ albedo_color = Color(0, 0, 1, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mb0wo"]
 
-[node name="FriendlyTroop" type="RigidBody3D" unique_id=892431120]
+[node name="FriendlyTroop" type="CharacterBody3D" unique_id=84826896]
 script = ExtResource("1_mb0wo")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1290880233]
@@ -27,3 +27,4 @@ shape = SubResource("CapsuleShape3D_q5w1q")
 mesh = SubResource("CapsuleMesh_mb0wo")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1327080631]
+debug_enabled = true

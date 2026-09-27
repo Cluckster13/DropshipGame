@@ -1,3 +1,5 @@
+NavigationRegion3D
+CharacterBody3D
 CollisionShape3D
 Area3D
 Node3D
@@ -11,4 +13,3 @@ Control
 CSGSphere3D
 CSGCylinder3D
 CSGBox3D
-Camera3D

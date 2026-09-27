@@ -1,9 +1,8 @@
-# Scenes/loadtrigger.gd
 class_name LoadTrigger
 extends Area3D
 
-@export var passenger_handler_path: NodePath
-@onready var passenger_handler: PassengerHandler = get_node(passenger_handler_path)
+@export var passenger_handler : PassengerHandler
+@export var door              : Node3D
 
 var _troops_in_range: Array[FriendlyTroop] = []
 
@@ -14,6 +13,8 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("Load"):
 		_command_boarding()
+	elif event.is_action_pressed("Unload"):
+		passenger_handler.unload_all()
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is FriendlyTroop and body not in _troops_in_range:
@@ -25,5 +26,12 @@ func _on_body_exited(body: Node3D) -> void:
 
 func _command_boarding() -> void:
 	for troop in _troops_in_range:
-		if troop.state == FriendlyTroop.States.IDLE and passenger_handler.get_free_seat() != "":
-			troop.command_board(global_position)
+		if troop.state != FriendlyTroop.States.IDLE:
+			print("troop found: ", troop)
+			continue
+		var seat_name: String = passenger_handler.get_free_seat()
+		if seat_name == "":
+			print("vehicle full")
+			break  ## vehicle full
+		if passenger_handler.reserve_seat(seat_name, troop):
+			troop.command_board(passenger_handler, seat_name, door.global_position)

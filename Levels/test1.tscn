@@ -3,6 +3,12 @@
 [ext_resource type="Texture2D" uid="uid://b64yawsoxkdqf" path="res://Assets/Dev/Orange/texture_09.png" id="1_3mpq8"]
 [ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
 [ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/FriendlyTroop.tscn" id="3_8nb80"]
+[ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="4_um744"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_g4v7s"]
+vertices = PackedVector3Array(-3552.8647, 1, -3300.0806, -3552.8647, 1, 3299.9194, 3554.1353, 1, 3299.9194, 3554.1353, 1, -3300.0806)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+cell_size = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8nb80"]
 albedo_texture = ExtResource("1_3mpq8")
@@ -11,31 +17,38 @@ uv1_triplanar = true
 
 [node name="Test1" type="Node3D" unique_id=109895588]
 
-[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=289055386]
-material_override = SubResource("StandardMaterial3D_8nb80")
-use_collision = true
-size = Vector3(7111.7295, 1, 6606.161)
-
 [node name="TestHelicopter" parent="." unique_id=753352377 instance=ExtResource("1_8etmp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8278236, 2.580696, -0.50720406)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.945728, 2.5806975, -0.51891136)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=447569339]
 transform = Transform3D(1, 0, 0, 0, 0.8957118, 0.44463518, 0, -0.44463518, 0.8957118, 0, 0, 0)
 
 [node name="FriendlyTroop" parent="." unique_id=892431120 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 6.375099)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 3.8200235, 6.375099)
 
 [node name="FriendlyTroop2" parent="." unique_id=901558281 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 2.3938663)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 3.8200235, 2.3938663)
 
 [node name="FriendlyTroop3" parent="." unique_id=274008195 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 1.5, 4.2539034)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 3.8200235, 4.2539034)
 
 [node name="FriendlyTroop4" parent="." unique_id=877031065 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 6.346988)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 3.8200235, 6.346988)
 
 [node name="FriendlyTroop5" parent="." unique_id=1422164345 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 4.542197)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 3.8200235, 4.542197)
 
 [node name="FriendlyTroop6" parent="." unique_id=757641191 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 1.5, 2.6696253)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 3.8200235, 2.6696253)
+
+[node name="TestHud" parent="." unique_id=1310896166 node_paths=PackedStringArray("test_helicopter", "friendly_troop") instance=ExtResource("4_um744")]
+test_helicopter = NodePath("../TestHelicopter")
+friendly_troop = NodePath("../FriendlyTroop")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=546952483]
+navigation_mesh = SubResource("NavigationMesh_g4v7s")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D" unique_id=289055386]
+material_override = SubResource("StandardMaterial3D_8nb80")
+use_collision = true
+size = Vector3(7111.7295, 1, 6606.161)
