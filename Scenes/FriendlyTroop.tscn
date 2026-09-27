@@ -26,5 +26,6 @@ shape = SubResource("CapsuleShape3D_q5w1q")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1620613639]
 mesh = SubResource("CapsuleMesh_mb0wo")
 
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1327080631]
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1173669933]
+path_height_offset = 5.0
 debug_enabled = true

@@ -1,5 +1,5 @@
 78098b89c88a74ebe8c20117b8754620
-::res://::1790485208
+::res://::1790486475
 icon.svg::CompressedTexture2D::1766994727699232214::1780294343::1780294349::1::::<><><>0<>0<>7d3cf06eeac6289871985c4098ef548d<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 ::res://Assets/::1790135312
 ::res://Assets/Dev/::1790135312
@@ -68,10 +68,10 @@ test1.tscn::PackedScene::1077982364361344016::1790484715::0::1::::<><><>0<>0<><>
 ::res://Resources/Scripts/::1790481756
 HelicopterRotors.gd::GDScript::853410930574880924::1781034743::0::1::::HelicopterRotors<>Node3D<><>0<>0<><>::
 loading_trigger.gd::GDScript::261470917501259293::1790481756::0::1::::LoadTrigger<>Area3D<><>0<>0<><>::
-::res://Scenes/::1790484895
+::res://Scenes/::1790486032
 CameraOrbit.gd::GDScript::5066933351426527035::1780963323::0::1::::CameraOrbit<>Camera3D<><>0<>0<><>::
-FriendlyTroop.tscn::PackedScene::1202122500571737070::1790484895::0::1::::<><><>0<>0<><>::uid://bhvxeulm8b5ac::::res://Scenes/friendly_troop.gd
-friendly_troop.gd::GDScript::2922499224053080914::1790484895::0::1::::FriendlyTroop<>CharacterBody3D<><>0<>0<><>::
+FriendlyTroop.tscn::PackedScene::1202122500571737070::1790486032::0::1::::<><><>0<>0<><>::uid://bhvxeulm8b5ac::::res://Scenes/friendly_troop.gd
+friendly_troop.gd::GDScript::2922499224053080914::1790485659::0::1::::FriendlyTroop<>CharacterBody3D<><>0<>0<><>::
 HUDv1.tscn::PackedScene::2144834493823565943::1790483314::0::1::::<><><>0<>0<><>::uid://drkvqxjmai3qg::::res://Levels/debugInfo.gd
 loading_trigger.tscn::PackedScene::4712739949789730063::1790137213::0::1::::<><><>0<>0<><>::uid://dywngkqjyq5r::::res://Resources/Scripts/loading_trigger.gd
 passengerhandler.gd::GDScript::5853024167163785424::1790481502::0::1::::PassengerHandler<>Node3D<><>0<>0<><>::

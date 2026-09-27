@@ -23,10 +23,11 @@ func _physics_process(delta: float) -> void:
 	match state:
 		States.PASSENGER:
 			_snap_to_seat()
-		States.MOVING_TO_BOARD, States.MOVING_TO_EXIT:
+		States.MOVING_TO_BOARD:
 			_move_along_nav(delta)
+			print("moving to board")
 		States.IDLE:
-			nav.target_position = Vector3(1,0,1)
+			_apply_gravity_only(delta)
 
 func _apply_gravity_only(delta: float) -> void:
 	if not is_on_floor():
@@ -43,25 +44,30 @@ func _move_along_nav(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 
-	#if nav.is_navigation_finished():
-		#velocity.x = 0.0
-		#velocity.z = 0.0
-		#move_and_slide()
-		#_on_arrived()
-		#return
+	if nav.is_navigation_finished():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		move_and_slide()
+		_on_arrived()
+		return
 
 	var next_pos: Vector3 = nav.get_next_path_position()
-	var to_next : Vector3 = next_pos - global_position
-	to_next.y = 0.0
+	var direction: Vector3 = global_position.direction_to(next_pos)
+	direction.y = 0.0
 
-	if to_next.length() > 0.01:
-		var dir: Vector3 = to_next.normalized()
-		velocity.x = dir.x * move_speed
-		velocity.z = dir.z * move_speed
-		look_at(global_position + dir, Vector3.UP)
-	#else:
-		#velocity.x = 0.0
-		#velocity.z = 0.0
+	if direction.length_squared() > 0.001:
+		direction = direction.normalized()
+
+		velocity.x = direction.x * move_speed
+		velocity.z = direction.z * move_speed
+
+		look_at(
+			global_position + direction,
+			Vector3.UP
+		)
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
 
 	move_and_slide()
 
