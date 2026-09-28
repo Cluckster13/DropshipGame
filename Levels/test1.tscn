@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
 [ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/FriendlyTroop.tscn" id="3_8nb80"]
 [ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="4_um744"]
-[ext_resource type="PackedScene" uid="uid://dxrfel2wl7hgx" path="res://Scenes/test.tscn" id="5_k0mcv"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_g4v7s"]
 vertices = PackedVector3Array(-3552.8647, 1, -3300.0806, -3552.8647, 1, 3299.9194, 3554.1353, 1, 3299.9194, 3554.1353, 1, -3300.0806)
@@ -25,24 +24,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.945728, 6.6995373, -0.5189
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=447569339]
 transform = Transform3D(1, 0, 0, 0, 0.8957118, 0.44463518, 0, -0.44463518, 0.8957118, 0, 0, 0)
 
-[node name="FriendlyTroop" parent="." unique_id=892431120 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 4.6851606, 6.375099)
-
-[node name="FriendlyTroop2" parent="." unique_id=901558281 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 4.6851606, 2.3938663)
-
-[node name="FriendlyTroop3" parent="." unique_id=274008195 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.257168, 4.6851606, 4.2539034)
-
-[node name="FriendlyTroop4" parent="." unique_id=877031065 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 4.6851606, 6.346988)
-
-[node name="FriendlyTroop5" parent="." unique_id=1422164345 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 4.6851606, 4.542197)
-
-[node name="FriendlyTroop6" parent="." unique_id=757641191 instance=ExtResource("3_8nb80")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.290828, 4.6851606, 2.6696253)
-
 [node name="TestHud" parent="." unique_id=1310896166 node_paths=PackedStringArray("test_helicopter", "friendly_troop") instance=ExtResource("4_um744")]
 test_helicopter = NodePath("../TestHelicopter")
 friendly_troop = NodePath("../FriendlyTroop")
@@ -55,5 +36,32 @@ material_override = SubResource("StandardMaterial3D_8nb80")
 use_collision = true
 size = Vector3(7111.7295, 1, 6606.161)
 
-[node name="test" parent="." unique_id=835928455 instance=ExtResource("5_k0mcv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8865337, 0)
+[node name="FriendlyTroop" parent="." unique_id=84826896 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 1.9073486e-06)
+
+[node name="FriendlyTroop2" parent="." unique_id=1113034224 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 2.7507405)
+
+[node name="FriendlyTroop3" parent="." unique_id=1249756064 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 5.308772)
+
+[node name="FriendlyTroop4" parent="." unique_id=1224247765 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.36467, 5.493927, 2.7507405)
+
+[node name="FriendlyTroop5" parent="." unique_id=1261038049 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.065529, 5.493927, 4.75553)
+
+[node name="FriendlyTroop6" parent="." unique_id=1983144150 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.393619, 5.493927, 0.09097767)
+
+[node name="FriendlyTroop7" parent="." unique_id=1246016539 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.937799, 5.493927, 4.3937154)
+
+[node name="FriendlyTroop8" parent="." unique_id=1535276002 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.724744, 5.493927, 0.5322747)
+
+[node name="FriendlyTroop9" parent="." unique_id=790742172 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.839201, 5.493927, 1.3860765)
+
+[node name="FriendlyTroop10" parent="." unique_id=2088793360 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.637201, 5.493927, 2.6679325)

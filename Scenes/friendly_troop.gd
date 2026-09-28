@@ -32,39 +32,55 @@ func _physics_process(delta: float) -> void:
 	match state:
 		States.PASSENGER:
 			_snap_to_seat()
-		States.MOVING_TO_BOARD:
-			direction = owner.global_position.direction_to(nav.get_next_path_position())
-		States.IDLE:
-			pass
-	_calculate_velocity(delta)
 
-func _apply_gravity_only(delta: float) -> void:
-	if not is_on_floor():
-		velocity.y -= _gravity * delta
-	else:
-		velocity.y = 0.0
-	velocity.x = 0.0
-	velocity.z = 0.0
+		States.MOVING_TO_BOARD, States.MOVING_TO_EXIT:
+			_update_navigation_direction()
+
+		States.IDLE:
+			direction = Vector3.ZERO
+
+	_calculate_velocity(delta)
 	move_and_slide()
 
+func _update_navigation_direction() -> void:
+	if nav.is_navigation_finished():
+		direction = Vector3.ZERO
+		_on_arrived()
+		return
 
-func _calculate_velocity(delta : float) -> void:
-	
-	target_velocity.x = direction.x * (current_movement_speed/current_movement_speed_divisor)
-	target_velocity.z = direction.z * (current_movement_speed/current_movement_speed_divisor)
-	
+	var next_position: Vector3 = nav.get_next_path_position()
+
+	var to_next: Vector3 = next_position - global_position
+	to_next.y = 0.0
+
+	if to_next.length_squared() > 0.001:
+		direction = to_next.normalized()
+	else:
+		direction = Vector3.ZERO
+
+func _calculate_velocity(delta: float) -> void:
+	target_velocity.x = direction.x * (current_movement_speed / current_movement_speed_divisor)
+	target_velocity.z = direction.z * (current_movement_speed / current_movement_speed_divisor)
+
 	if acceleration_enabled:
-		current_lerp_velocity = current_lerp_velocity.lerp(target_velocity,delta * current_acceleration_multiplier)
+		current_lerp_velocity = current_lerp_velocity.lerp(
+			target_velocity,
+			delta * current_acceleration_multiplier
+		)
+
 		velocity.x = current_lerp_velocity.x
 		velocity.z = current_lerp_velocity.z
 	else:
 		velocity.x = target_velocity.x
 		velocity.z = target_velocity.z
-
-	if is_on_floor():
-		return
 		
-	_apply_gravity_only(delta)
+	if not is_on_floor():
+		velocity.y -= _gravity * delta
+	#else:
+		#velocity.y = 0.0
+		#velocity.x = 0.0
+		#velocity.z = 0.0
+
 
 #func _move_along_nav(delta: float) -> void:
 	#if not is_on_floor():
@@ -141,6 +157,8 @@ func ai_debug_info() -> Dictionary:
 		"Next_Path": nav.get_next_path_position(),
 		"Position": global_position,
 		"Velocity": velocity,
+		"target_velocity": target_velocity,
+		"Direction": direction,
 		"On_Floor": is_on_floor(),
 		"Map_Ready": NavigationServer3D.map_get_iteration_id(nav.get_navigation_map()) > 0
 	}

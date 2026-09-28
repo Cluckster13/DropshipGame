@@ -26,8 +26,9 @@ func _on_body_exited(body: Node3D) -> void:
 
 func _command_boarding() -> void:
 	for troop in _troops_in_range:
-		if troop.state != FriendlyTroop.States.IDLE:
+		if _troops_in_range != null:
 			print("troop found: ", troop)
+		if troop.state != FriendlyTroop.States.IDLE:
 			continue
 		var seat_name: String = passenger_handler.get_free_seat()
 		if seat_name == "":
