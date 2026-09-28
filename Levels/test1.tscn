@@ -34,6 +34,8 @@ navigation_mesh = SubResource("NavigationMesh_g4v7s")
 [node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D" unique_id=289055386]
 material_override = SubResource("StandardMaterial3D_8nb80")
 use_collision = true
+collision_layer = 3
+collision_mask = 3
 size = Vector3(7111.7295, 1, 6606.161)
 
 [node name="FriendlyTroop" parent="." unique_id=84826896 instance=ExtResource("3_8nb80")]

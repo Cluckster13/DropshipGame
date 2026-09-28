@@ -14,6 +14,7 @@ var current_movement_speed : float = 4.0
 var current_acceleration_multiplier : float = 14
 var current_movement_speed_divisor : float = 1
 var direction : Vector3 = Vector3.ZERO
+var turn_speed: float = 8.0
 
 var seat_marker        : Node3D = null
 var assigned_seat_name : String = ""
@@ -24,7 +25,7 @@ var _gravity : float = ProjectSettings.get_setting("physics/3d/default_gravity",
 @onready var nav: NavigationAgent3D = $NavigationAgent3D
 
 func _ready() -> void:
-	nav.path_desired_distance = 0.5
+	nav.path_desired_distance = 1
 	nav.target_desired_distance = arrival_distance
 	nav.path_max_distance = 100.0
 
@@ -52,6 +53,18 @@ func _update_navigation_direction() -> void:
 
 	var to_next: Vector3 = next_position - global_position
 	to_next.y = 0.0
+
+	if to_next.length_squared() > 0.001:
+		direction = to_next.normalized()
+
+		var target_angle: float = atan2(-direction.x, -direction.z)
+		rotation.y = lerp_angle(
+			rotation.y,
+			target_angle,
+			get_physics_process_delta_time() * turn_speed
+		)
+	else:
+		direction = Vector3.ZERO
 
 	if to_next.length_squared() > 0.001:
 		direction = to_next.normalized()
@@ -139,15 +152,22 @@ func command_board(handler: PassengerHandler, seat_name: String, door_position: 
 	state = States.MOVING_TO_BOARD
 	nav.target_position = door_position
 
-func command_disembark(exit_position: Vector3) -> void:
+func command_disembark(door_position: Vector3) -> void:
 	if passenger_handler and assigned_seat_name != "":
 		passenger_handler.vacate_seat(assigned_seat_name)
 
 	seat_marker = null
-	collision_layer = 1
-	collision_mask  = 1
+
+	# Teleport out to the door threshold first — the same safe spot
+	# boarding already walks up to — rather than starting the walk
+	# from inside the hull's solid collision box.
+	global_position = door_position
+
+
 	state = States.MOVING_TO_EXIT
-	nav.target_position = exit_position
+	nav.target_position = Vector3.ZERO
+	collision_layer  = 1
+	collision_mask   = 1
 
 func ai_debug_info() -> Dictionary:
 	return {

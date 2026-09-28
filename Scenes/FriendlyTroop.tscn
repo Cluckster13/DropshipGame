@@ -16,7 +16,7 @@ albedo_color = Color(0, 0, 1, 1)
 script = ExtResource("1_mb0wo")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1290880233]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.62394285, 0.43799043)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.62394285, -0.41008693)
 mesh = SubResource("BoxMesh_g4v7s")
 surface_material_override/0 = SubResource("StandardMaterial3D_q5w1q")
 

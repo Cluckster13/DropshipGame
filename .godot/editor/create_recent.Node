@@ -1,3 +1,4 @@
+Marker3D
 NavigationAgent3D
 CollisionShape3D
 MeshInstance3D
@@ -11,4 +12,3 @@ RichTextLabel
 Label
 Control
 CSGSphere3D
-CSGCylinder3D
