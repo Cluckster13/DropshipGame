@@ -1,2 +1,5 @@
 res://Scenes/test.tscn
 res://Scenes/friendly_troop.gd
+res://Scenes/passengerhandler.gd
+res://Scenes/FriendlyTroop.tscn
+res://Levels/test1.tscn

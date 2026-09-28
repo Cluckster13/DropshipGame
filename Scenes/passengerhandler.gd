@@ -24,7 +24,7 @@ func seat_marker(seat_name: String) -> Node3D:
 		return seats[seat_name]["marker"]
 	return null
 
-func assign_seat(seat_name: String, occupant: Node3D) -> bool:
+func reserve_seat(seat_name: String, occupant: Node3D) -> bool:
 	if seats.has(seat_name) and not seats[seat_name]["occupied"]:
 		seats[seat_name]["occupant"] = occupant
 		seats[seat_name]["occupied"] = true
@@ -36,11 +36,9 @@ func vacate_seat(seat_name: String) -> void:
 		seats[seat_name]["occupant"] = null
 		seats[seat_name]["occupied"] = false
 
-#
-
-func _on_npc_loading_area_left_body_entered(body: Node3D) -> void:
-	if body is FriendlyTroop:
-		var seat_name: String = get_free_seat()
-		if seat_name != "":
-			if assign_seat(seat_name, body):
-				body.command_board(self, seat_name, loading_area_left.global_position)
+func unload_all() -> void:
+	for seat_name in seats:
+		if seats[seat_name]["occupied"]:
+			var occupant: Node3D = seats[seat_name]["occupant"]
+			occupant.command_disembark(loading_area_left.global_position)
+			vacate_seat(seat_name)

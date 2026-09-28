@@ -33,7 +33,7 @@ func _physics_process(delta: float) -> void:
 		States.PASSENGER:
 			_snap_to_seat()
 		States.MOVING_TO_BOARD:
-			direction = owner.global_position.direction_to(nav.target_position)
+			direction = owner.global_position.direction_to(nav.get_next_path_position())
 		States.IDLE:
 			pass
 	_calculate_velocity(delta)
