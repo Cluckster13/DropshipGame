@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://714h6hneyr13"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_64tgw"]
+height = 4.364258
+radius = 0.057128906
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_g4v7s"]
+top_radius = 0.04248047
+bottom_radius = 0.04248047
+height = 4.326172
+
+[sub_resource type="BoxMesh" id="BoxMesh_yf5fn"]
+size = Vector3(1, 0.60009766, 0.0078125)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_g4v7s"]
+height = 4.6921387
+radius = 25.083984
+
+[node name="Objective_A" type="StaticBody3D" unique_id=1836356735 groups=["Objectives"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=918225016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.126709, 0)
+shape = SubResource("CylinderShape3D_64tgw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=96333055]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.163086, 0)
+mesh = SubResource("CylinderMesh_g4v7s")
+
+[node name="Flag" type="MeshInstance3D" parent="." unique_id=984104561]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5338857, 3.9947333, -0.0013183355)
+mesh = SubResource("BoxMesh_yf5fn")
+
+[node name="CaptureArea" type="Area3D" parent="." unique_id=375442395]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CaptureArea" unique_id=428235337]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3460693, 0)
+shape = SubResource("CylinderShape3D_g4v7s")

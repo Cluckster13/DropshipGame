@@ -1,7 +1,7 @@
 class_name FriendlyTroop
 extends CharacterBody3D
 
-enum States {IDLE, MOVING_TO_BOARD, PASSENGER, MOVING_TO_EXIT}
+enum States {IDLE, MOVING_TO_BOARD, PASSENGER, MOVING_TO_EXIT, MOVING_TO_OBJ, COMBAT}
 var state: States = States.IDLE
 
 @export var move_speed       : float = 15
@@ -16,6 +16,8 @@ var current_movement_speed_divisor : float = 1
 var direction : Vector3 = Vector3.ZERO
 var turn_speed: float = 8.0
 
+var objectives : Array
+
 var seat_marker        : Node3D = null
 var assigned_seat_name : String = ""
 var passenger_handler  : PassengerHandler = null
@@ -28,6 +30,7 @@ func _ready() -> void:
 	nav.path_desired_distance = 1
 	nav.target_desired_distance = arrival_distance
 	nav.path_max_distance = 100.0
+	get_tree().get_nodes_in_group("Objectives").append_array(objectives)
 
 func _physics_process(delta: float) -> void:
 	match state:
@@ -39,9 +42,19 @@ func _physics_process(delta: float) -> void:
 
 		States.IDLE:
 			direction = Vector3.ZERO
+		
+		States.MOVING_TO_OBJ:
+			pass
 
 	_calculate_velocity(delta)
 	move_and_slide()
+
+func _change_state(state_change : States) -> void:
+	state = state_change
+
+func _find_objectives() -> void:
+	for obj in objectives:
+		pass
 
 func _update_navigation_direction() -> void:
 	if nav.is_navigation_finished():
@@ -89,41 +102,6 @@ func _calculate_velocity(delta: float) -> void:
 		
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
-	#else:
-		#velocity.y = 0.0
-		#velocity.x = 0.0
-		#velocity.z = 0.0
-
-
-#func _move_along_nav(delta: float) -> void:
-	#if not is_on_floor():
-		#velocity.y -= _gravity * delta
-	#else:
-		#velocity.y = 0.0
-
-	#var next_pos: Vector3 = nav.get_next_path_position()
-	#var to_next : Vector3 = next_pos - global_position
-	#to_next.y = 0.0
-
-	#var horizontal_dist_to_target := (nav.target_position - global_position)
-	#horizontal_dist_to_target.y = 0.0
-
-	#if nav.is_navigation_finished() or horizontal_dist_to_target.length() <= arrival_distance:
-		#velocity.x = 0.0
-		#velocity.z = 0.0
-		#move_and_slide()
-		#_on_arrived()
-		#print("arrived")
-		#return
-
-
-	#var dir: Vector3 = to_next.normalized()
-	#velocity.x = dir.x * move_speed
-	#velocity.z = dir.z * move_speed
-	#look_at(global_position + dir, Vector3.UP)
-	#print("velocity")
-
-	#move_and_slide()
 
 func _on_arrived() -> void:
 	match state:

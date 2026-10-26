@@ -1,4 +1,4 @@
 res://Scenes/testheli.tscn
 res://Scenes/friendly_troop.gd
-res://Levels/test1.tscn
-res://Scenes/passengerhandler.gd
+res://Resources/Scripts/loading_trigger.gd
+res://Scenes/Objective.tscn
