@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
 [ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/FriendlyTroop.tscn" id="3_8nb80"]
 [ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="4_um744"]
+[ext_resource type="PackedScene" uid="uid://714h6hneyr13" path="res://Scenes/Objective.tscn" id="5_k0mcv"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_g4v7s"]
 vertices = PackedVector3Array(-3552.8647, 1, -3300.0806, -3552.8647, 1, 3299.9194, 3554.1353, 1, 3299.9194, 3554.1353, 1, -3300.0806)
@@ -67,3 +68,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.839201, 5.493927, 1.386076
 
 [node name="FriendlyTroop10" parent="." unique_id=2088793360 instance=ExtResource("3_8nb80")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.637201, 5.493927, 2.6679325)
+
+[node name="Objective_A" parent="." unique_id=1836356735 instance=ExtResource("5_k0mcv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 647.9687, 0.5, 189.3227)

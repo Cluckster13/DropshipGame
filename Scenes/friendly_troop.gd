@@ -17,6 +17,7 @@ var direction : Vector3 = Vector3.ZERO
 var turn_speed: float = 8.0
 
 var objectives : Array
+var target_obj : Objective = null
 
 var seat_marker        : Node3D = null
 var assigned_seat_name : String = ""
@@ -30,21 +31,17 @@ func _ready() -> void:
 	nav.path_desired_distance = 1
 	nav.target_desired_distance = arrival_distance
 	nav.path_max_distance = 100.0
-	get_tree().get_nodes_in_group("Objectives").append_array(objectives)
 
 func _physics_process(delta: float) -> void:
 	match state:
 		States.PASSENGER:
 			_snap_to_seat()
-
-		States.MOVING_TO_BOARD, States.MOVING_TO_EXIT:
+			
+		States.MOVING_TO_BOARD, States.MOVING_TO_EXIT, States.MOVING_TO_OBJ:
 			_update_navigation_direction()
 
 		States.IDLE:
 			direction = Vector3.ZERO
-		
-		States.MOVING_TO_OBJ:
-			pass
 
 	_calculate_velocity(delta)
 	move_and_slide()
@@ -52,9 +49,40 @@ func _physics_process(delta: float) -> void:
 func _change_state(state_change : States) -> void:
 	state = state_change
 
-func _find_objectives() -> void:
-	for obj in objectives:
-		pass
+func _find_nearest_objective() -> Objective:
+	var best : Objective = null
+	var best_dist := INF
+	for node in get_tree().get_nodes_in_group("Objectives"):
+		var obj := node as Objective
+		if obj == null or obj.owner_team == 1:   # skip already-friendly
+			continue
+		var d := global_position.distance_squared_to(obj.global_position)
+		if d < best_dist:
+			best_dist = d
+			best = obj
+	return best
+
+func command_move_to_objective(obj: Objective) -> void:
+	_clear_target_obj()
+	if obj == null:
+		_change_state(States.IDLE)
+		return
+	target_obj = obj
+	target_obj.captured.connect(_on_target_captured)
+	nav.target_position = obj.global_position
+	_change_state(States.MOVING_TO_OBJ)
+
+func advance_to_nearest_objective() -> void:
+	command_move_to_objective(_find_nearest_objective())
+
+func _clear_target_obj() -> void:
+	if target_obj and target_obj.captured.is_connected(_on_target_captured):
+		target_obj.captured.disconnect(_on_target_captured)
+	target_obj = null
+
+func _on_target_captured(team: int) -> void:
+	# Someone (us or a teammate) finished it, so pick the next one
+	advance_to_nearest_objective()
 
 func _update_navigation_direction() -> void:
 	if nav.is_navigation_finished():
@@ -108,8 +136,11 @@ func _on_arrived() -> void:
 		States.MOVING_TO_BOARD:
 			_board_seat()
 		States.MOVING_TO_EXIT:
-			state = States.IDLE
 			seat_marker = null
+			advance_to_nearest_objective()   # leave the heli and head straight out
+		States.MOVING_TO_OBJ:
+			# Standing inside the capture zone now; Objective counts us via its Area3D
+			_change_state(States.IDLE)
 
 func _snap_to_seat() -> void:
 	if seat_marker == null:
@@ -143,7 +174,7 @@ func command_disembark(door_position: Vector3) -> void:
 
 
 	state = States.MOVING_TO_EXIT
-	nav.target_position = Vector3.ZERO
+	#nav.target_position = Vector3.ZERO
 	collision_layer  = 1
 	collision_mask   = 1
 
