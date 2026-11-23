@@ -1,0 +1,301 @@
+class_name Squad
+extends Node
+## Groups Troops under one set of orders (a fireteam / squad). Put Troop
+## instances as children (they're picked up in _ready) or call add_member().
+##
+## Plain Node on purpose: it has no transform, so troops underneath keep
+## their own world positions instead of being dragged around by the parent.
+##
+## Movement: the leader (first available member) navigates to the goal at a
+## slightly reduced pace; everyone else continuously re-targets their slot
+## in a vee behind the leader, speeding up when they fall behind. On arrival
+## a MOVE order settles into the vee, a CAPTURE order fans out into a ring
+## inside the capture zone.
+##
+## Semi-autonomous: with auto_advance on, the squad picks its own next
+## objective once everyone is off the helicopter and again after each
+## capture. The player or a battle director can override at any time with
+## order_move / order_capture / order_hold.
+
+signal order_completed(squad: Squad)
+signal wiped_out(squad: Squad)
+
+enum Orders {NONE, HOLD, MOVE, CAPTURE}
+
+@export var squad_name : String = "Alpha"
+## 1 = friendly, -1 = enemy. Pushed onto every member.
+@export_range(-1, 1, 1) var team : int = Troop.TEAM_FRIENDLY
+## Choose the next objective by itself after landing / capturing
+@export var auto_advance : bool = true
+
+@export_group("Vee formation")
+## Distance between neighbours along each arm of the vee (metres)
+@export var vee_spacing : float = 2.5
+## Angle of each arm away from straight-behind. 45 = classic vee,
+## lower = narrow / deep, higher = wide / shallow.
+@export_range(10.0, 80.0, 1.0) var vee_angle_deg : float = 45.0
+## Leader walks at this fraction of full speed so followers can keep up
+@export_range(0.5, 1.0, 0.05) var leader_pace : float = 0.8
+## Followers this far (m) from their slot run at max catch-up speed
+@export var catch_up_distance : float = 6.0
+## Max follower speed multiplier when catching up
+@export var catch_up_speed : float = 1.25
+## Followers aim this many seconds ahead of the leader's motion (smooths stop-start)
+@export var slot_lookahead : float = 1.0
+## How often follower slots are recomputed (s)
+@export var formation_update_interval : float = 0.2
+
+@export_group("Capture")
+## Start fanning out into the capture ring when the leader is this close
+@export var deploy_distance : float = 12.0
+## Gap between troops in the capture ring (metres)
+@export var formation_spacing : float = 2.0
+
+var members    : Array[Troop] = []
+var order      : Orders = Orders.NONE
+var order_position : Vector3
+var target_obj : Objective = null
+
+var _travelling : bool = false
+var _formation_timer : float = 0.0
+
+func _ready() -> void:
+	for child in get_children():
+		if child is Troop:
+			add_member(child)
+
+func _physics_process(delta: float) -> void:
+	if not _travelling:
+		return
+	var lead := leader()
+	if lead == null:
+		return
+
+	_formation_timer -= delta
+	if _formation_timer <= 0.0:
+		_formation_timer = formation_update_interval
+		_update_formation(lead)
+
+	var to_goal := order_position - lead.global_position
+	to_goal.y = 0.0
+	if order == Orders.CAPTURE and to_goal.length() <= deploy_distance:
+		_deploy_ring()
+	elif order == Orders.MOVE and lead.state == Troop.States.IDLE:
+		_settle_vee(lead)
+
+# ---------------------------------------------------------------- membership
+
+func add_member(troop: Troop) -> void:
+	if troop in members:
+		return
+	if troop.squad and troop.squad != self:
+		troop.squad.remove_member(troop)
+	members.append(troop)
+	troop.squad = self
+	troop.team  = team
+	troop.died.connect(_on_member_died)
+	troop.arrived.connect(_on_member_arrived)
+	troop.disembarked.connect(_on_member_disembarked)
+
+func remove_member(troop: Troop) -> void:
+	members.erase(troop)
+	if not is_instance_valid(troop):
+		return
+	if troop.squad == self:
+		troop.squad = null
+	troop.speed_scale = 1.0
+	for pair in [[troop.died, _on_member_died], [troop.arrived, _on_member_arrived], [troop.disembarked, _on_member_disembarked]]:
+		if pair[0].is_connected(pair[1]):
+			pair[0].disconnect(pair[1])
+
+func alive_members() -> Array[Troop]:
+	var out: Array[Troop] = []
+	for t in members:
+		if is_instance_valid(t) and t.is_alive():
+			out.append(t)
+	return out
+
+## Members on the ground and able to take a move order
+func available_members() -> Array[Troop]:
+	var out: Array[Troop] = []
+	for t in alive_members():
+		if t.is_available():
+			out.append(t)
+	return out
+
+## Point man: first member on the ground. Changes automatically if he dies.
+func leader() -> Troop:
+	var units := available_members()
+	return units[0] if not units.is_empty() else null
+
+func centroid() -> Vector3:
+	var units := alive_members()
+	if units.is_empty():
+		return Vector3.ZERO
+	var sum := Vector3.ZERO
+	for t in units:
+		sum += t.global_position
+	return sum / units.size()
+
+# ---------------------------------------------------------------- orders
+
+## Travel in a vee; leader ends on `pos`, squad settles in the vee around him
+func order_move(pos: Vector3) -> void:
+	_clear_target_obj()
+	order = Orders.MOVE
+	_start_travel(pos)
+
+## Travel in a vee, then fan out into a ring inside the capture zone and
+## hold until it flips
+func order_capture(obj: Objective) -> void:
+	_clear_target_obj()
+	if obj == null:
+		order_hold()
+		return
+	target_obj = obj
+	target_obj.captured.connect(_on_objective_captured)
+	order = Orders.CAPTURE
+	_start_travel(obj.global_position)
+
+func order_hold() -> void:
+	_clear_target_obj()
+	_travelling = false
+	order = Orders.HOLD
+	for t in available_members():
+		t.speed_scale = 1.0
+		t.stop()
+
+func advance_to_nearest_objective() -> void:
+	var obj := Objective.nearest_not_owned_by(get_tree(), centroid(), team)
+	print("[Squad %s] advancing to %s" % [squad_name, obj.name if obj else "nothing (holding)"])
+	order_capture(obj)
+
+# ---------------------------------------------------------------- formation movement
+
+func _start_travel(dest: Vector3) -> void:
+	order_position = dest
+	_travelling = true
+	_formation_timer = 0.0   # update on the very next physics frame
+
+func _update_formation(lead: Troop) -> void:
+	# Leader heads for the goal at a steady pace (re-issued in case the
+	# leader changed because the previous one died or got on an aircraft)
+	lead.speed_scale = leader_pace
+	if lead.state != Troop.States.MOVING or not lead.nav.target_position.is_equal_approx(order_position):
+		lead.move_to(order_position)
+
+	var facing := _leader_facing(lead)
+	var forward := -facing.z
+	# Aim followers where their slot is *about to be*, so they keep walking
+	# alongside the leader instead of reaching a stale point and stopping
+	var lead_vel := Vector3(lead.velocity.x, 0.0, lead.velocity.z)
+	var gain := (catch_up_speed - leader_pace) / catch_up_distance
+
+	var units := available_members()
+	for i in range(1, units.size()):
+		var t := units[i]
+		var slot := lead.global_position + facing * _vee_offset(i)
+		var err := slot - t.global_position
+		err.y = 0.0
+		# Behind the slot -> speed up, ahead of it -> ease off.
+		# Sideways error also adds a little speed so they can cut across.
+		var behind := err.dot(forward)
+		var sideways := absf(err.dot(facing.x))
+		t.speed_scale = clampf(leader_pace + (behind + sideways * 0.5) * gain, 0.5, catch_up_speed)
+		t.move_to(slot + lead_vel * slot_lookahead)
+
+func _settle_vee(lead: Troop) -> void:
+	_travelling = false
+	var facing := _leader_facing(lead)
+	var units := available_members()
+	for i in units.size():
+		units[i].speed_scale = 1.0
+		if i > 0:
+			units[i].move_to(lead.global_position + facing * _vee_offset(i))
+
+func _deploy_ring() -> void:
+	_travelling = false
+	var units := available_members()
+	for i in units.size():
+		units[i].speed_scale = 1.0
+		units[i].move_to(order_position + _ring_offset(i, units.size()))
+
+## Which way "forward" is for the formation. Uses the leader's body yaw,
+## which is already smoothed by Troop.turn_speed, so slots don't jitter.
+func _leader_facing(lead: Troop) -> Basis:
+	if lead.state != Troop.States.MOVING:
+		var to_goal := order_position - lead.global_position
+		to_goal.y = 0.0
+		if to_goal.length_squared() > 0.01:
+			return Basis.looking_at(to_goal.normalized())
+	return Basis(Vector3.UP, lead.global_rotation.y)   # troop forward is -Z
+
+## Slot i in the vee, in leader space (-Z forward, +Z behind).
+## 0 = leader at the point; then alternating right/left arm, one step back each pair.
+func _vee_offset(i: int) -> Vector3:
+	if i == 0:
+		return Vector3.ZERO
+	var step := (i + 1) / 2
+	var side := 1.0 if i % 2 == 1 else -1.0
+	var angle := deg_to_rad(vee_angle_deg)
+	var along := step * vee_spacing
+	return Vector3(side * along * sin(angle), 0.0, along * cos(angle))
+
+func _ring_offset(i: int, count: int) -> Vector3:
+	if count <= 1:
+		return Vector3.ZERO
+	var radius := maxf(formation_spacing, count * formation_spacing / TAU)
+	var angle  := TAU * i / count
+	return Vector3(cos(angle), 0.0, sin(angle)) * radius
+
+# ---------------------------------------------------------------- member events
+
+func _on_member_disembarked(_troop: Troop) -> void:
+	if not auto_advance:
+		return
+	# Wait until the whole squad is clear of the aircraft before moving off
+	for t in alive_members():
+		if t.state == Troop.States.PASSENGER or t.state == Troop.States.MOVING_TO_EXIT:
+			return
+	advance_to_nearest_objective()
+
+func _on_member_arrived(_troop: Troop) -> void:
+	# Followers reach their slot constantly while travelling; only care once settled
+	if order != Orders.MOVE or _travelling:
+		return
+	for t in available_members():
+		if t.state == Troop.States.MOVING:
+			return
+	order_completed.emit(self)
+
+func _on_member_died(troop: Troop) -> void:
+	remove_member(troop)
+	if alive_members().is_empty():
+		_travelling = false
+		_clear_target_obj()
+		wiped_out.emit(self)
+
+func _on_objective_captured(by_team: int) -> void:
+	if by_team != team:
+		return   # the other side took it; it's still a valid target for us
+	order_completed.emit(self)
+	if auto_advance:
+		advance_to_nearest_objective()
+	else:
+		order_hold()
+
+func _clear_target_obj() -> void:
+	if target_obj and is_instance_valid(target_obj) and target_obj.captured.is_connected(_on_objective_captured):
+		target_obj.captured.disconnect(_on_objective_captured)
+	target_obj = null
+
+func debug_info() -> Dictionary:
+	return {
+		"Squad": squad_name,
+		"Team": team,
+		"Order": Orders.keys()[order],
+		"Travelling": _travelling,
+		"Alive": alive_members().size(),
+		"Leader": leader().name if leader() else "-",
+		"Target": target_obj.name if target_obj else "-",
+	}

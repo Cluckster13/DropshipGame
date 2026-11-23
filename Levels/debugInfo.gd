@@ -1,7 +1,7 @@
 extends Control
 
 @export var test_helicopter: HeliBase
-@export var friendly_troop: FriendlyTroop
+@export var friendly_troop: Troop
 
 @onready var heli_text: RichTextLabel = $HeliText
 @onready var aitext: RichTextLabel = $AItext

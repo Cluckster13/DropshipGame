@@ -3,8 +3,10 @@ extends Area3D
 
 @export var passenger_handler : PassengerHandler
 @export var door              : Node3D
+## Only troops on this team may board (1 = friendly)
+@export_range(-1, 1, 1) var allowed_team : int = Troop.TEAM_FRIENDLY
 
-var _troops_in_range: Array[FriendlyTroop] = []
+var _troops_in_range: Array[Troop] = []
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
@@ -17,22 +19,39 @@ func _unhandled_input(event: InputEvent) -> void:
 		passenger_handler.unload_all()
 
 func _on_body_entered(body: Node3D) -> void:
-	if body is FriendlyTroop and body not in _troops_in_range:
+	if body is Troop and body not in _troops_in_range:
 		_troops_in_range.append(body)
 
 func _on_body_exited(body: Node3D) -> void:
-	if body is FriendlyTroop:
+	if body is Troop:
 		_troops_in_range.erase(body)
 
+## Squads board together (whole squad or nobody) so they don't get split
+## across aircraft. Troops without a squad board one by one.
 func _command_boarding() -> void:
+	var handled: Array[Troop] = []
 	for troop in _troops_in_range:
-		if _troops_in_range != null:
-			print("troop found: ", troop)
-		if troop.state != FriendlyTroop.States.IDLE:
+		if not is_instance_valid(troop) or troop in handled or troop.team != allowed_team:
 			continue
-		var seat_name: String = passenger_handler.get_free_seat()
-		if seat_name == "":
-			print("vehicle full")
-			break  ## vehicle full
-		if passenger_handler.reserve_seat(seat_name, troop):
-			troop.command_board(passenger_handler, seat_name, door.global_position)
+
+		var group: Array[Troop] = []
+		if troop.squad:
+			group = troop.squad.available_members()
+		elif troop.is_available():
+			group = [troop]
+		handled.append_array(group)
+		if troop.squad:
+			handled.append_array(troop.squad.alive_members())
+
+		if group.is_empty():
+			continue
+		if group.size() > passenger_handler.free_seat_count():
+			print("Not enough seats for %s (%d needed, %d free)" % [
+				troop.squad.squad_name if troop.squad else troop.name,
+				group.size(), passenger_handler.free_seat_count()])
+			continue
+
+		for t in group:
+			var seat_name := passenger_handler.get_free_seat()
+			if passenger_handler.reserve_seat(seat_name, t):
+				t.command_board(passenger_handler, seat_name, door.global_position)

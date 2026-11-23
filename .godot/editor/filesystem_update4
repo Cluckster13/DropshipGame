@@ -1,0 +1,8 @@
+res://Scenes/objective.gd
+res://Scenes/troop.gd
+res://Scenes/squad.gd
+res://Scenes/passengerhandler.gd
+res://Resources/Scripts/loading_trigger.gd
+res://Levels/debugInfo.gd
+res://Scenes/FriendlyTroop.tscn
+res://Levels/test1.tscn

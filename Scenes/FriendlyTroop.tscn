@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://rek1t631f3la"]
 
-[ext_resource type="Script" uid="uid://bhvxeulm8b5ac" path="res://Scenes/friendly_troop.gd" id="1_mb0wo"]
+[ext_resource type="Script" uid="uid://dynq0djn18peu" path="res://Scenes/troop.gd" id="1_mb0wo"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
 size = Vector3(0.38964844, 0.2624054, 0.34228516)
@@ -12,8 +12,9 @@ albedo_color = Color(0, 0, 1, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mb0wo"]
 
-[node name="FriendlyTroop" type="CharacterBody3D" unique_id=84826896]
+[node name="FriendlyTroop" type="CharacterBody3D" unique_id=84826896 node_paths=PackedStringArray("tint_mesh")]
 script = ExtResource("1_mb0wo")
+tint_mesh = NodePath("MeshInstance3D2")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1290880233]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.62394285, -0.41008693)
