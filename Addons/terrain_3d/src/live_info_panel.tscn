@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://dfxfplbduvpw6"]
+[gd_scene format=3 uid="uid://dfxfplbduvpw6"]
 
 [ext_resource type="Script" uid="uid://dgpd4t1nmfjug" path="res://addons/terrain_3d/src/live_info_panel.gd" id="1_1615y"]
 
