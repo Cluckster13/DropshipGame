@@ -29,6 +29,9 @@ func _on_body_exited(body: Node3D) -> void:
 ## Squads board together (whole squad or nobody) so they don't get split
 ## across aircraft. Troops without a squad board one by one.
 func _command_boarding() -> void:
+	if not passenger_handler.can_load_or_unload():
+		print("[LoadTrigger] Can't load: aircraft must be landed")
+		return
 	var handled: Array[Troop] = []
 	for troop in _troops_in_range:
 		if not is_instance_valid(troop) or troop in handled or troop.team != allowed_team:
@@ -47,7 +50,7 @@ func _command_boarding() -> void:
 			continue
 		if group.size() > passenger_handler.free_seat_count():
 			print("Not enough seats for %s (%d needed, %d free)" % [
-				troop.squad.squad_name if troop.squad else troop.name,
+				troop.squad.squad_name if troop.squad else str(troop.name),
 				group.size(), passenger_handler.free_seat_count()])
 			continue
 

@@ -50,6 +50,10 @@ class_name HeliBase
 @export var rotor_spool_up_rate    : float = 60.0
 @export var rotor_spool_down_rate  : float = 30.0
 
+# ─── Landing (used to gate troop loading / unloading) ───────────────────────
+@export var landed_check_distance : float = 1.5   ## Skids within this of the ground (m)
+@export var landed_max_speed      : float = 1.5   ## And moving slower than this (m/s)
+
 var rotor_rpm_current : float = 0.0
 var engine_on         : bool  = false
 
@@ -185,6 +189,16 @@ func _apply_hover_stability(_delta: float) -> void:
 
 
 
+## On (or right above) the ground and nearly stopped. Troops may only board
+## or get off while this is true.
+func is_landed() -> bool:
+	if linear_velocity.length() > landed_max_speed:
+		return false
+	var from := global_position + Vector3.UP * 0.5
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * (landed_check_distance + 0.5))
+	query.exclude = [get_rid()]
+	return not get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
 func get_debug_info() -> Dictionary:
 	return {
 		"engine_on"          : engine_on,
@@ -194,4 +208,5 @@ func get_debug_info() -> Dictionary:
 		"linear_speed"       : linear_velocity.length(),
 		"forward_speed_kmh"  : snappedf((global_basis.inverse() * linear_velocity).z * -3.6, 1.0),
 		"altitude"           : global_position.y,
+		"landed"             : is_landed(),
 	}

@@ -1,3 +1,4 @@
+Node
 Sprite3D
 Timer
 CollisionShape3D
@@ -12,4 +13,3 @@ Node3D
 RigidBody3D
 DirectionalLight3D
 RichTextLabel
-Label

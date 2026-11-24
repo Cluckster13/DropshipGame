@@ -4,8 +4,12 @@
 [ext_resource type="Script" uid="uid://cegpwfyueige2" path="res://Scenes/CameraOrbit.gd" id="2_p7jay"]
 [ext_resource type="PackedScene" uid="uid://caunffqn21xq8" path="res://Assets/Models/Blackhawk/BlackhawkV2.glb" id="4_etpvc"]
 [ext_resource type="Script" uid="uid://mfns2wsno061" path="res://Resources/Scripts/HelicopterRotors.gd" id="5_34h5m"]
+[ext_resource type="ArrayMesh" uid="uid://byfgkmurhpnos" path="res://Assets/Models/Blackhawk/Minigun/minigun.tres" id="5_88xxk"]
+[ext_resource type="ArrayMesh" uid="uid://baexawxmkchs" path="res://Assets/Models/Blackhawk/Minigun/MinigunAxel.tres" id="5_gk8nd"]
 [ext_resource type="Script" uid="uid://cpnipnsu1dldg" path="res://Scenes/passengerhandler.gd" id="6_sq5nx"]
+[ext_resource type="Script" uid="uid://d4iix0xfovypl" path="res://Scenes/door_gun.gd" id="7_1qnl8"]
 [ext_resource type="PackedScene" uid="uid://b8e5eya8fgpm2" path="res://Scenes/loading_trigger.tscn" id="7_y27xj"]
+[ext_resource type="Script" uid="uid://dcc7c6josmxe2" path="res://Scenes/gunner_controller.gd" id="8_gk8nd"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
 size = Vector3(5.5733643, 5.1016846, 25.402832)
@@ -36,6 +40,23 @@ shape = SubResource("BoxShape3D_etpvc")
 [node name="BlackhawkV2" parent="." unique_id=1189646811 instance=ExtResource("4_etpvc")]
 transform = Transform3D(0.015, 0, 0, 0, 0.015, 0, 0, 0, 0.015, 0, 0, 0)
 script = ExtResource("5_34h5m")
+
+[node name="MiniGunAxelLeft" parent="BlackhawkV2" index="31" unique_id=1636299913]
+visible = false
+
+[node name="MiniGun_MiniGunShader_0_002" parent="BlackhawkV2" index="42" unique_id=942963561]
+visible = false
+
+[node name="MiniGun_MiniGunShader_0_003" parent="BlackhawkV2" index="43" unique_id=417039262]
+visible = false
+
+[node name="MiniGun_MiniGunShader_0_001" parent="BlackhawkV2" index="45" unique_id=2049220190]
+visible = false
+mesh = ExtResource("5_88xxk")
+
+[node name="MiniGunAxelLeft_001" parent="BlackhawkV2" index="46" unique_id=106889861]
+visible = false
+mesh = ExtResource("5_gk8nd")
 
 [node name="LoadingTrigger" parent="." unique_id=707622379 node_paths=PackedStringArray("passenger_handler", "door") instance=ExtResource("7_y27xj")]
 passenger_handler = NodePath("../PassengerHandler")
@@ -99,5 +120,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.985138, 118.94001, 333.53
 
 [node name="ChairNPCSpot15" type="Node3D" parent="PassengerHandler" unique_id=1913422623]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -92.92365, 118.94001, 333.533)
+
+[node name="DoorGunLeft" type="Node3D" parent="." unique_id=1385074140]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.6059246, 2.6, 6.83605)
+script = ExtResource("7_1qnl8")
+model_scale = 0.015
+axle_mesh = ExtResource("5_gk8nd")
+axle_mesh_offset = Vector3(0, -0.26, -0.03)
+axle_mesh_rotation_deg = Vector3(0, 90, 0)
+minigun_mesh = ExtResource("5_88xxk")
+minigun_mesh_offset = Vector3(0.16, -0.2, 0)
+minigun_mesh_rotation_deg = Vector3(0, 90, 0)
+
+[node name="DoorGunRight" type="Node3D" parent="." unique_id=891399034]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.75, 2.6, 6.8224773)
+script = ExtResource("7_1qnl8")
+model_scale = 0.015
+axle_mesh = ExtResource("5_gk8nd")
+axle_mesh_offset = Vector3(0.16, -0.2, 0)
+axle_mesh_rotation_deg = Vector3(0, 90, 0)
+minigun_mesh = ExtResource("5_88xxk")
+minigun_mesh_offset = Vector3(0.16, -0.2, 0)
+minigun_mesh_rotation_deg = Vector3(0, 90, 0)
+
+[node name="Gunner" type="Node" parent="." unique_id=1017252988 node_paths=PackedStringArray("guns", "orbit_camera")]
+script = ExtResource("8_gk8nd")
+guns = [NodePath("../DoorGunLeft"), NodePath("../DoorGunRight")]
+orbit_camera = NodePath("../Camera3D")
 
 [editable path="BlackhawkV2"]

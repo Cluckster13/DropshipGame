@@ -10,8 +10,31 @@ extends Node3D
 @onready var left_door_node  : Node3D = get_node(left_door)
 @onready var right_door_node : Node3D = get_node(right_door)
 
+## Seconds airborne before troops still walking to the door give up
+@export var takeoff_cancel_delay : float = 0.5
+
 var seats: Dictionary = {}
 var _is_unloading: bool = false
+var _airborne_time: float = 0.0
+
+## The helicopter we belong to (our parent). Null = no landing checks.
+@onready var aircraft : HeliBase = get_parent() as HeliBase
+
+func can_load_or_unload() -> bool:
+	return aircraft == null or aircraft.is_landed()
+
+func _physics_process(delta: float) -> void:
+	if can_load_or_unload():
+		_airborne_time = 0.0
+		return
+	_airborne_time += delta
+	if _airborne_time < takeoff_cancel_delay:
+		return
+	# Took off while troops were still walking to the door: they stay behind
+	for seat_name in seats:
+		var occupant = seats[seat_name]["occupant"]
+		if is_instance_valid(occupant) and occupant is Troop and occupant.state == Troop.States.MOVING_TO_BOARD:
+			occupant.cancel_board()
 
 func _ready() -> void:
 	for spot in get_children():
@@ -62,7 +85,8 @@ func _rally_point(door_pos: Vector3, slot: int) -> Vector3:
 	if (door_pos - global_position).dot(side) < 0.0:
 		side = -side
 	var fore := side.cross(Vector3.UP).normalized()
-	var step := (slot + 1) / 2
+	@warning_ignore("integer_division")
+	var step := (slot + 1) / 2   # 0,1,1,2,2... (intentional int division)
 	var fan := 1.0 if slot % 2 == 1 else -1.0
 	return door_pos + side * exit_distance + fore * (fan * step * exit_spacing)
 
@@ -71,6 +95,9 @@ func _rally_point(door_pos: Vector3, slot: int) -> Vector3:
 func unload_all() -> void:
 	if _is_unloading:
 		return
+	if not can_load_or_unload():
+		print("[PassengerHandler] Can't unload: aircraft must be landed")
+		return
 	_is_unloading = true
 	var left_slot  := 0
 	var right_slot := 0
@@ -78,7 +105,10 @@ func unload_all() -> void:
 	for seat_name in seats.keys():
 		var data: Dictionary = seats[seat_name]
 		var occupant = data["occupant"]
-		if data["occupied"] and is_instance_valid(occupant) and occupant is Troop:
+		if not can_load_or_unload():
+			print("[PassengerHandler] Took off mid-unload, remaining troops stay aboard")
+			break
+		if data["occupied"] and is_instance_valid(occupant) and occupant is Troop and occupant.state == Troop.States.PASSENGER:
 			var is_left   : bool   = _seat_number(seat_name) % 2 == 0
 			var door_node : Node3D = left_door_node if is_left else right_door_node
 			var door_pos  : Vector3 = door_node.global_position

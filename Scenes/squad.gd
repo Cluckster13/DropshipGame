@@ -27,6 +27,9 @@ enum Orders {NONE, HOLD, MOVE, CAPTURE}
 @export_range(-1, 1, 1) var team : int = Troop.TEAM_FRIENDLY
 ## Choose the next objective by itself after landing / capturing
 @export var auto_advance : bool = true
+## Soldier quality pushed onto every member (see Troop.skill).
+## 1 = baseline, <1 = green/sloppy, >1 = veteran.
+@export_range(0.25, 2.0, 0.05) var skill : float = 1.0
 
 @export_group("Vee formation")
 ## Distance between neighbours along each arm of the vee (metres)
@@ -51,7 +54,20 @@ enum Orders {NONE, HOLD, MOVE, CAPTURE}
 ## Gap between troops in the capture ring (metres)
 @export var formation_spacing : float = 2.0
 
+@export_group("Combat")
+## Seconds with nobody engaged before the squad resumes its order
+@export var contact_clear_delay : float = 3.0
+## A known enemy that nobody has seen for this long is forgotten, so the
+## squad can't stay pinned forever by someone it can't reach
+@export var enemy_memory_time : float = 15.0
+
 var members    : Array[Troop] = []
+## True from first shot until contact_clear_delay after the last one
+var in_contact : bool = false
+var last_contact_position : Vector3
+## Enemies this squad has engaged and is still worried about: Troop -> last seen time (s)
+var known_enemies : Dictionary = {}
+var _contact_clear_timer : float = 0.0
 var order      : Orders = Orders.NONE
 var order_position : Vector3
 var target_obj : Objective = null
@@ -65,6 +81,9 @@ func _ready() -> void:
 			add_member(child)
 
 func _physics_process(delta: float) -> void:
+	if in_contact:
+		_update_contact(delta)
+		return   # formation movement is paused while fighting
 	if not _travelling:
 		return
 	var lead := leader()
@@ -93,9 +112,11 @@ func add_member(troop: Troop) -> void:
 	members.append(troop)
 	troop.squad = self
 	troop.team  = team
+	troop.skill = skill
 	troop.died.connect(_on_member_died)
 	troop.arrived.connect(_on_member_arrived)
 	troop.disembarked.connect(_on_member_disembarked)
+	troop.contact.connect(_on_member_contact)
 
 func remove_member(troop: Troop) -> void:
 	members.erase(troop)
@@ -104,7 +125,7 @@ func remove_member(troop: Troop) -> void:
 	if troop.squad == self:
 		troop.squad = null
 	troop.speed_scale = 1.0
-	for pair in [[troop.died, _on_member_died], [troop.arrived, _on_member_arrived], [troop.disembarked, _on_member_disembarked]]:
+	for pair in [[troop.died, _on_member_died], [troop.arrived, _on_member_arrived], [troop.disembarked, _on_member_disembarked], [troop.contact, _on_member_contact]]:
 		if pair[0].is_connected(pair[1]):
 			pair[0].disconnect(pair[1])
 
@@ -167,7 +188,7 @@ func order_hold() -> void:
 
 func advance_to_nearest_objective() -> void:
 	var obj := Objective.nearest_not_owned_by(get_tree(), centroid(), team)
-	print("[Squad %s] advancing to %s" % [squad_name, obj.name if obj else "nothing (holding)"])
+	print("[Squad %s] advancing to %s" % [squad_name, str(obj.name) if obj else "nothing (holding)"])
 	order_capture(obj)
 
 # ---------------------------------------------------------------- formation movement
@@ -235,7 +256,8 @@ func _leader_facing(lead: Troop) -> Basis:
 func _vee_offset(i: int) -> Vector3:
 	if i == 0:
 		return Vector3.ZERO
-	var step := (i + 1) / 2
+	@warning_ignore("integer_division")
+	var step := (i + 1) / 2   # 1,1,2,2,3,3... (intentional int division)
 	var side := 1.0 if i % 2 == 1 else -1.0
 	var angle := deg_to_rad(vee_angle_deg)
 	var along := step * vee_spacing
@@ -244,9 +266,68 @@ func _vee_offset(i: int) -> Vector3:
 func _ring_offset(i: int, count: int) -> Vector3:
 	if count <= 1:
 		return Vector3.ZERO
-	var radius := maxf(formation_spacing, count * formation_spacing / TAU)
+	var radius := maxf(formation_spacing, count * formation_spacing / TAU) * 2
 	var angle  := TAU * i / count
 	return Vector3(cos(angle), 0.0, sin(angle)) * radius
+
+# ---------------------------------------------------------------- contact
+
+## Halt and fight: the whole squad stops where it is. Whoever can see an
+## enemy shoots; the rest hold position. Order is kept and resumed later.
+func _on_member_contact(_troop: Troop, enemy: Troop) -> void:
+	last_contact_position = enemy.global_position
+	known_enemies[enemy] = _now()
+	_contact_clear_timer = 0.0
+	if in_contact:
+		return
+	in_contact = true
+	_travelling = false
+	print("[Squad %s] contact!" % squad_name)
+	for t in available_members():
+		t.speed_scale = 1.0
+		if t.state != Troop.States.COMBAT:
+			t.stop()
+
+## Contact only ends when nobody is fighting AND every enemy we know about
+## is dead or hasn't been seen for enemy_memory_time. Stops the squad from
+## strolling back into the fire after killing the nearest enemy.
+func _update_contact(delta: float) -> void:
+	var now := _now()
+	var fighting := false
+	for t in alive_members():
+		if t.state == Troop.States.COMBAT:
+			fighting = true
+			if is_instance_valid(t.target):
+				known_enemies[t.target] = now   # still in sight: refresh
+				last_contact_position = t.target.global_position
+
+	for e in known_enemies.keys():
+		if not is_instance_valid(e) or not e.is_alive() or now - known_enemies[e] > enemy_memory_time:
+			known_enemies.erase(e)
+
+	if fighting or not known_enemies.is_empty():
+		_contact_clear_timer = 0.0
+		return
+	_contact_clear_timer += delta
+	if _contact_clear_timer >= contact_clear_delay:
+		in_contact = false
+		print("[Squad %s] contact clear, resuming %s" % [squad_name, Orders.keys()[order]])
+		_resume_order()
+
+func _now() -> float:
+	return Time.get_ticks_msec() / 1000.0
+
+func _resume_order() -> void:
+	match order:
+		Orders.CAPTURE:
+			if target_obj and is_instance_valid(target_obj):
+				order_capture(target_obj)
+			elif auto_advance:
+				advance_to_nearest_objective()
+		Orders.MOVE:
+			order_move(order_position)
+		_:
+			pass   # NONE / HOLD: stay put
 
 # ---------------------------------------------------------------- member events
 
@@ -271,7 +352,10 @@ func _on_member_arrived(_troop: Troop) -> void:
 func _on_member_died(troop: Troop) -> void:
 	remove_member(troop)
 	if alive_members().is_empty():
+		print("[Squad %s] wiped out" % squad_name)
 		_travelling = false
+		in_contact = false
+		known_enemies.clear()
 		_clear_target_obj()
 		wiped_out.emit(self)
 
@@ -295,7 +379,9 @@ func debug_info() -> Dictionary:
 		"Team": team,
 		"Order": Orders.keys()[order],
 		"Travelling": _travelling,
+		"In_Contact": in_contact,
+		"Known_Enemies": known_enemies.size(),
 		"Alive": alive_members().size(),
-		"Leader": leader().name if leader() else "-",
-		"Target": target_obj.name if target_obj else "-",
+		"Leader": str(leader().name) if leader() else "-",
+		"Target": str(target_obj.name) if target_obj else "-",
 	}

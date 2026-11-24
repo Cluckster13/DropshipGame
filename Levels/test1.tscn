@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://b64yawsoxkdqf" path="res://Assets/Dev/Orange/texture_09.png" id="1_3mpq8"]
 [ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
-[ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/FriendlyTroop.tscn" id="3_8nb80"]
+[ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/Troop.tscn" id="3_8nb80"]
 [ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="4_um744"]
 [ext_resource type="Script" uid="uid://c4lwmva67ur0n" path="res://Scenes/squad.gd" id="5_ea35m"]
 [ext_resource type="PackedScene" uid="uid://714h6hneyr13" path="res://Scenes/Objective.tscn" id="5_k0mcv"]
@@ -40,9 +40,6 @@ collision_layer = 3
 collision_mask = 3
 size = Vector3(7111.7295, 1, 6606.161)
 
-[node name="Objective_A" parent="." unique_id=1836356735 instance=ExtResource("5_k0mcv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 647.9687, 0.5, 189.3227)
-
 [node name="SquadAlpha" type="Node" parent="." unique_id=1665787738]
 script = ExtResource("5_ea35m")
 
@@ -79,3 +76,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.839201, 5.493927, 1.386076
 
 [node name="FriendlyTroop10" parent="SquadBravo" unique_id=2088793360 instance=ExtResource("3_8nb80")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.637201, 5.493927, 2.6679325)
+
+[node name="EnemySquadRed" type="Node" parent="." unique_id=722725129]
+script = ExtResource("5_ea35m")
+squad_name = "Red"
+team = -1
+auto_advance = false
+
+[node name="Red1" parent="EnemySquadRed" unique_id=1850983498 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.5, 20)
+
+[node name="Red2" parent="EnemySquadRed" unique_id=1488632379 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 25)
+
+[node name="Red3" parent="EnemySquadRed" unique_id=1520753922 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 1.5, 20)
+
+[node name="Red4" parent="EnemySquadRed" unique_id=577672500 instance=ExtResource("3_8nb80")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 15)
+
+[node name="Objectives" type="Node" parent="." unique_id=1814417269]
+
+[node name="Objective_A" parent="Objectives" unique_id=1836356735 instance=ExtResource("5_k0mcv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0.5, 20)
+initial_owner = -1
+
+[node name="Objective_B" parent="Objectives" unique_id=2070778633 instance=ExtResource("5_k0mcv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1318.9136)
