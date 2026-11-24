@@ -4,9 +4,9 @@
 # to detect the terrain height from Terrain3D without using collision.
 #
 # Copy this file into /addons/proton_scatter/src/modifiers
-# Then uncomment everything below (select, press CTRL+K)
-# In the editor, add this modifier to Scatter, then set your Terrain3D node
-
+ #Then uncomment everything below (select, press CTRL+K)
+ #In the editor, add this modifier to Scatter, then set your Terrain3D node
+#
 #@tool
 #extends "base_modifier.gd"
 #
