@@ -76,6 +76,7 @@ func _man_gun(index: int) -> void:
 	var gun := guns[index]
 	gun.manual_control = true
 	gun.camera.make_current()
+	_set_orbit_input(false)   # stop orbit-camera freelook grabbing the mouse
 	Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
 	get_viewport().warp_mouse(get_viewport().get_visible_rect().size * 0.5)
 	_layer.visible = true
@@ -87,8 +88,13 @@ func _leave_gun() -> void:
 	active_index = -1
 	if orbit_camera:
 		orbit_camera.make_current()
+	_set_orbit_input(true)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_layer.visible = false
+
+func _set_orbit_input(enabled: bool) -> void:
+	if orbit_camera and "input_enabled" in orbit_camera:
+		orbit_camera.input_enabled = enabled
 
 func _release(gun: DoorGun) -> void:
 	gun.manual_control = false

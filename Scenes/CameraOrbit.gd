@@ -31,6 +31,14 @@ var _is_freelook : bool = false
 var _desired_position : Vector3 = Vector3.ZERO
 var _target_node      : Node3D
 
+## Set false while another view owns the mouse (e.g. manning a door gun),
+## so freelook can't grab/capture it.
+var input_enabled : bool = true:
+	set(value):
+		input_enabled = value
+		if not value:
+			_is_freelook = false
+
 func _ready() -> void:
 	_target_node = get_parent() as Node3D
 	assert(_target_node != null, "HeliCamera must be a child of a Node3D")
@@ -42,6 +50,8 @@ func _ready() -> void:
 	_yaw = _target_node.rotation.y + PI
 
 func _input(event: InputEvent) -> void:
+	if not input_enabled:
+		return
 	if event.is_action("Freelook") and not event.is_echo():
 		_set_freelook(event.is_action_pressed("Freelook"))
 

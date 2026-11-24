@@ -1,11 +1,2 @@
-res://Levels/test1.tscn
-res://Levels/debugInfo.gd
-res://Scenes/squad.gd
-res://Scenes/passengerhandler.gd
-res://Scenes/troop.gd
-res://Resources/Scripts/loading_trigger.gd
-res://Scenes/Troop.tscn
-res://Scenes/Objective.tscn
-res://Scenes/testheli.gd
-res://Scenes/testheli.tscn
-res://Scenes/door_gun.gd
+res://Scenes/CameraOrbit.gd
+res://Scenes/gunner_controller.gd

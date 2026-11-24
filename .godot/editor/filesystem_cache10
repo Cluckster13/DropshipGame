@@ -1,5 +1,5 @@
 78098b89c88a74ebe8c20117b8754620
-::res://::1795492922
+::res://::1795497319
 icon.svg::CompressedTexture2D::1766994727699232214::1780294343::1780294349::1::::<><><>0<>0<>7d3cf06eeac6289871985c4098ef548d<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 ::res://addons/::1795472416
 ::res://addons/godot_ai/::1795472411
@@ -180,7 +180,7 @@ LICENSE.txt::TextFile::-1::1795469535::0::1::::<><><>0<>0<><>::
 plugin.cfg::TextFile::-1::1795469536::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1795469535::0::1::::<><><>0<>0<><>::
 terrain.gdextension::GDExtension::2625506675569593757::1795469537::0::1::::<><><>0<>0<><>::
-::res://addons/terrain_3d/bin/::1795492920
+::res://addons/terrain_3d/bin/::1795497317
 ::res://addons/terrain_3d/bin/libterrain.macos.debug.framework/::1795469535
 ::res://addons/terrain_3d/bin/libterrain.macos.release.framework/::1795469535
 ::res://addons/terrain_3d/csharp/::1795469536
@@ -289,7 +289,7 @@ texture_11.png::CompressedTexture2D::3776736345191283975::1780297042::1780297061
 texture_12.png::CompressedTexture2D::2060604186427156723::1780297042::1780297043::1::::<><><>0<>0<>cea6df2f95538f3d3072fbf7d1e432fa<>res://.godot/imported/texture_12.png-060524ed681e7505a12c85dd1bd88b17.ctex::
 texture_13.png::CompressedTexture2D::6083708169144389522::1780297042::1780297043::1::::<><><>0<>0<>65b3ffb87e308d510075be8bba34d09a<>res://.godot/imported/texture_13.png-6721d2e22498eeadadc8a4ed554fffe2.ctex::
 ::res://Assets/Models/::1790135312
-::res://Assets/Models/Blackhawk/::1790135629
+::res://Assets/Models/Blackhawk/::1795496448
 BlackhawkV2.glb::PackedScene::4814927460304298173::1780961760::1790135629::1::::<><><>0<>0<>3ac1b9e75837c2450fc9a5fa5548bfd0<>res://.godot/imported/BlackhawkV2.glb-83a260ff3aa1c98f3a867d8839d16d06.scn::uid://c5rwf0c2sxdf7::::res://Assets/Models/Blackhawk/BlackhawkV2_MainRotorsShader_baseColor.jpg<>uid://q6j1a2vwqrgk::::res://Assets/Models/Blackhawk/BlackhawkV2_MainRotorsShader_normal.png<>uid://b5ktcfo11i8dt::::res://Assets/Models/Blackhawk/BlackhawkV2_RotorBaseShader_baseColor.jpg<>uid://oiw48cj0yiqo::::res://Assets/Models/Blackhawk/BlackhawkV2_RotorBaseShader_normal.png<>uid://b832mshs0oh45::::res://Assets/Models/Blackhawk/BlackhawkV2_RotorHeadShader_baseColor.jpg<>uid://c7e1br7fwbawa::::res://Assets/Models/Blackhawk/BlackhawkV2_RotorHeadShader_normal.png<>uid://b22wv3ytosohg::::res://Assets/Models/Blackhawk/BlackhawkV2_material_0_baseColor.jpg<>uid://ln7orhbfjcfk::::res://Assets/Models/Blackhawk/BlackhawkV2_material_0_normal.png<>uid://csskg6x61puia::::res://Assets/Models/Blackhawk/BlackhawkV2_TailRotorShader_baseColor.jpg<>uid://3wwddpb8syne::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorHullShader_baseColor.jpg<>uid://bopwdpxcfvrpa::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorHullShader_normal.png<>uid://cg7hrn3xxbh56::::res://Assets/Models/Blackhawk/BlackhawkV2_InteriorShader_baseColor.jpg<>uid://dwrvd1tkjcafr::::res://Assets/Models/Blackhawk/BlackhawkV2_InteriorShader_normal.png<>uid://mx3r6tojs15g::::res://Assets/Models/Blackhawk/BlackhawkV2_ControlDeskShader_baseColor.jpg<>uid://buo6fhvo2eb1j::::res://Assets/Models/Blackhawk/BlackhawkV2_Seat_ControlShader_baseColor.jpg<>uid://dy1q1i16jqajh::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_baseColor.jpg<>uid://0xe6pag4qjdd::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_normal.png<>uid://bradsfmeb6qjl::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorPartsShader_baseColor.jpg<>uid://d3k6lc1m0lext::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorPartsShader_normal.png<>uid://bh6vvc5svvpcj::::res://Assets/Models/Blackhawk/BlackhawkV2_DoorsRightSideShader_baseColor.jpg<>uid://cusnnbvsll018::::res://Assets/Models/Blackhawk/BlackhawkV2_DoorsRightSideShader_normal.png<>uid://kubw3gaxtcjg::::res://Assets/Models/Blackhawk/BlackhawkV2_DoorsLeftSideShader_baseColor.jpg<>uid://csugg1mp68r61::::res://Assets/Models/Blackhawk/BlackhawkV2_DoorsLeftSideShader_normal.png<>uid://p7m4msbqmdyc::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorMainPartsShader_baseColor.jpg<>uid://yoxctvqphgqr::::res://Assets/Models/Blackhawk/BlackhawkV2_ExteriorMainPartsShader_normal.png<>uid://uanrwhl830p::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_baseColor_26.jpg<>uid://b5t8umfjkehb5::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_normal_25.png
 BlackhawkV2_ControlDeskShader_baseColor.jpg::CompressedTexture2D::891478904517607562::1780961782::1780961800::1::::<><><>0<>0<>b310deb93733c6850ddb8effb97e92a3<>res://.godot/imported/BlackhawkV2_ControlDeskShader_baseColor.jpg-542b57f00630fd55dc1b554a777c13c5.s3tc.ctex::
 BlackhawkV2_DoorsLeftSideShader_baseColor.jpg::CompressedTexture2D::743277475874309192::1780961787::1780961800::1::::<><><>0<>0<>8e979436702637f431136fd4137d592d<>res://.godot/imported/BlackhawkV2_DoorsLeftSideShader_baseColor.jpg-e700af4c5a493a5a5c3e86dac30ab7be.s3tc.ctex::
@@ -318,6 +318,9 @@ BlackhawkV2_RotorHeadShader_baseColor.jpg::CompressedTexture2D::4762116846279135
 BlackhawkV2_RotorHeadShader_normal.png::CompressedTexture2D::7028723245012620788::1780961762::1780961801::1::::<><><>0<>0<>314ae053c9486a8d2b70b00e57c84d18<>res://.godot/imported/BlackhawkV2_RotorHeadShader_normal.png-ccddff796718a21373e407477a7e1465.s3tc.ctex::
 BlackhawkV2_Seat_ControlShader_baseColor.jpg::CompressedTexture2D::3820990401532550481::1780961783::1780961800::1::::<><><>0<>0<>72a5856f9581e15422b50231d68b595f<>res://.godot/imported/BlackhawkV2_Seat_ControlShader_baseColor.jpg-96123621457130b6c0371b232a1b8606.s3tc.ctex::
 BlackhawkV2_TailRotorShader_baseColor.jpg::CompressedTexture2D::6074018902333166872::1780961765::1780961800::1::::<><><>0<>0<>ed19abb7d5c3a15815caef5c87191965<>res://.godot/imported/BlackhawkV2_TailRotorShader_baseColor.jpg-eb4fb098e7afd644be329973e7bd3d69.s3tc.ctex::
+::res://Assets/Models/Blackhawk/Minigun/::1795496717
+minigun.tres::ArrayMesh::4081657641630476586::1795496717::0::1::::<><><>0<>0<><>::uid://uanrwhl830p::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_baseColor_26.jpg<>uid://b5t8umfjkehb5::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_normal_25.png
+MinigunAxel.tres::ArrayMesh::70472819916054392::1795496463::0::1::::<><><>0<>0<><>::uid://uanrwhl830p::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_baseColor_26.jpg<>uid://b5t8umfjkehb5::::res://Assets/Models/Blackhawk/BlackhawkV2_MiniGunShader_normal_25.png
 ::res://demo/::1795472384
 CodeGeneratedDemo.tscn::PackedScene::5766609049318048670::1795469537::0::1::::<><><>0<>0<><>::uid://dakis6gu8b7nm::::res://demo/src/CodeGenerated.gd<>uid://domhm87hbhbg1::::res://demo/components/Player.tscn<>uid://bb2lp50sjndus::::res://demo/components/Environment.tscn<>uid://di5fovhcyd7re::::res://demo/components/Enemy.tscn<>uid://d2jihfohphuue::::res://demo/components/UI.tscn<>uid://brh8x1wnycrl5::::res://demo/src/RuntimeNavigationBaker.gd
 Demo.tscn::PackedScene::5293781890024210248::1795472384::0::1::::<><><>0<>0<><>::uid://chstoagn42gbr::::res://demo/src/DemoScene.gd<>uid://d2jihfohphuue::::res://demo/components/UI.tscn<>uid://bb2lp50sjndus::::res://demo/components/Environment.tscn<>uid://domhm87hbhbg1::::res://demo/components/Player.tscn<>uid://djhl3foqkj4e2::::res://demo/components/Tunnel.tscn<>uid://ccvn15t8km0ft::::res://demo/data/M_terrain.tres<>uid://cgk4glwmc4vk2::::res://addons/terrain_3d/extras/shaders/M_ocean.tres<>uid://d3sr0a7dxfkr8::::res://addons/terrain_3d/extras/particle_example/Terrain3DParticles.tscn<>uid://dal3jhw6241qg::::res://demo/data/assets.tres
@@ -379,18 +382,18 @@ test1.tscn::PackedScene::1077982364361344016::1795493483::0::1::::<><><>0<>0<><>
 ::res://Resources/Scripts/::1795495228
 HelicopterRotors.gd::GDScript::853410930574880924::1781034743::0::1::::HelicopterRotors<>Node3D<><>0<>0<><>::
 loading_trigger.gd::GDScript::261470917501259293::1795495228::0::1::::LoadTrigger<>Area3D<><>0<>0<><>::
-::res://Scenes/::1795495302
+::res://Scenes/::1795497216
 CameraOrbit.gd::GDScript::5066933351426527035::1780963323::0::1::::CameraOrbit<>Camera3D<><>0<>0<><>::
-door_gun.gd::GDScript::9211781696677659473::1795495302::0::1::::DoorGun<>Node3D<><>0<>0<><>::
+door_gun.gd::GDScript::9211781696677659473::1795496598::0::1::::DoorGun<>Node3D<><>0<>0<><>::
+gunner_controller.gd::GDScript::7305716652007566719::1795495318::0::1::::GunnerController<>Node<><>0<>0<><>::
 HUDv1.tscn::PackedScene::2144834493823565943::1790483314::0::1::::<><><>0<>0<><>::uid://drkvqxjmai3qg::::res://Levels/debugInfo.gd
 loading_trigger.tscn::PackedScene::4712739949789730063::1790636549::0::1::::<><><>0<>0<><>::uid://dywngkqjyq5r::::res://Resources/Scripts/loading_trigger.gd
 objective.gd::GDScript::5196191126660779104::1795492736::0::1::::Objective<>StaticBody3D<><>0<>0<><>::
 Objective.tscn::PackedScene::2301491751004607284::1795493975::0::1::::<><><>0<>0<><>::uid://cgbcrkbjrl2x5::::res://Scenes/objective.gd
 passengerhandler.gd::GDScript::5853024167163785424::1795495227::0::1::::PassengerHandler<>Node3D<><>0<>0<><>::
-gunner_controller.gd::GDScript::7305716652007566719::1795495318::0::1::::GunnerController<>Node<><>0<>0<><>::
 squad.gd::GDScript::6832384295993940259::1795494503::0::1::::Squad<>Node<><>0<>0<><>::
 testheli.gd::GDScript::3370167973700471818::1795495216::0::1::::HeliBase<>RigidBody3D<><>0<>0<><>::
-testheli.tscn::PackedScene::8367609522491156770::1791688571::0::1::::<><><>0<>0<><>::uid://boasf6kmn2875::::res://Scenes/testheli.gd<>uid://cegpwfyueige2::::res://Scenes/CameraOrbit.gd<>uid://caunffqn21xq8::::res://Assets/Models/Blackhawk/BlackhawkV2.glb<>uid://mfns2wsno061::::res://Resources/Scripts/HelicopterRotors.gd<>uid://cpnipnsu1dldg::::res://Scenes/passengerhandler.gd<>uid://b8e5eya8fgpm2::::res://Scenes/loading_trigger.tscn
+testheli.tscn::PackedScene::8367609522491156770::1795497216::0::1::::<><><>0<>0<><>::uid://boasf6kmn2875::::res://Scenes/testheli.gd<>uid://cegpwfyueige2::::res://Scenes/CameraOrbit.gd<>uid://caunffqn21xq8::::res://Assets/Models/Blackhawk/BlackhawkV2.glb<>uid://mfns2wsno061::::res://Resources/Scripts/HelicopterRotors.gd<>uid://byfgkmurhpnos::::res://Assets/Models/Blackhawk/Minigun/minigun.tres<>uid://baexawxmkchs::::res://Assets/Models/Blackhawk/Minigun/MinigunAxel.tres<>uid://cpnipnsu1dldg::::res://Scenes/passengerhandler.gd<>uid://d4iix0xfovypl::::res://Scenes/door_gun.gd<>uid://b8e5eya8fgpm2::::res://Scenes/loading_trigger.tscn<>uid://dcc7c6josmxe2::::res://Scenes/gunner_controller.gd
 tracer.gd::GDScript::6991256236896417218::1795492579::0::1::::Tracer<>MeshInstance3D<><>0<>0<><>::
 troop.gd::GDScript::8871647498026753248::1795495216::0::1::::Troop<>CharacterBody3D<><>0<>0<><>::
 Troop.tscn::PackedScene::1202122500571737070::1795494054::0::1::::<><><>0<>0<><>::uid://dynq0djn18peu::::res://Scenes/troop.gd
