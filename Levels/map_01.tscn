@@ -10,7 +10,6 @@
 [ext_resource type="Script" uid="uid://gjjh4mw1wn51" path="res://addons/proton_scatter/src/modifiers/create_inside_random.gd" id="4_t613c"]
 [ext_resource type="Script" uid="uid://b0332hlb7q5t1" path="res://addons/proton_scatter/src/modifiers/randomize_transforms.gd" id="5_dwgi2"]
 [ext_resource type="Script" uid="uid://dc4rwlje6dfca" path="res://addons/proton_scatter/src/modifiers/relax.gd" id="6_4jtr0"]
-[ext_resource type="Script" uid="uid://it6ja2wjneak" path="res://addons/proton_scatter/src/modifiers/project_on_geometry.gd" id="7_xdy50"]
 [ext_resource type="Script" uid="uid://c85i0481q4uog" path="res://addons/proton_scatter/src/scatter_item.gd" id="8_31kwq"]
 [ext_resource type="Script" uid="uid://w6hwy0ffji12" path="res://addons/proton_scatter/src/modifiers/project_on_terrain3d.gd" id="8_fvyod"]
 [ext_resource type="Script" uid="uid://dx7e7heldjwmg" path="res://addons/proton_scatter/src/scatter_shape.gd" id="9_xwpff"]
@@ -78,7 +77,7 @@ texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_
 
 [sub_resource type="Resource" id="Resource_j14xw"]
 script = ExtResource("4_t613c")
-amount = 500
+amount = 750
 restrict_height = true
 reference_frame = 1
 
@@ -95,12 +94,6 @@ offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_gpavj"]
-script = ExtResource("7_xdy50")
-ray_length = 5.0
-ray_offset = 5.0
-remove_points_on_miss = false
-
 [sub_resource type="Resource" id="Resource_uk2fe"]
 script = ExtResource("8_fvyod")
 terrain_node = NodePath("../Terrain3D")
@@ -110,16 +103,63 @@ target_texture_id = 1
 
 [sub_resource type="Resource" id="Resource_63y7u"]
 script = ExtResource("2_fvyod")
-stack = Array[ExtResource("3_uk2fe")]([SubResource("Resource_j14xw"), SubResource("Resource_cn1bw"), SubResource("Resource_5u4d8"), SubResource("Resource_gpavj"), SubResource("Resource_uk2fe")])
+stack = Array[ExtResource("3_uk2fe")]([SubResource("Resource_j14xw"), SubResource("Resource_cn1bw"), SubResource("Resource_5u4d8"), SubResource("Resource_uk2fe")])
 
 [sub_resource type="Resource" id="Resource_g8bsm"]
+script = ExtResource("10_602vj")
+radius = 2457.9114
+
+[sub_resource type="Resource" id="Resource_xdy50"]
+script = ExtResource("4_t613c")
+amount = 750
+restrict_height = true
+reference_frame = 1
+
+[sub_resource type="Resource" id="Resource_31kwq"]
+script = ExtResource("5_dwgi2")
+position = Vector3(0.15, 0.15, 0.15)
+rotation = Vector3(20, 360, 20)
+scale = Vector3(0.1, 0.1, 0.1)
+reference_frame = 2
+
+[sub_resource type="Resource" id="Resource_xwpff"]
+script = ExtResource("6_4jtr0")
+offset_step = 0.2
+consecutive_step_multiplier = 0.75
+restrict_height = true
+
+[sub_resource type="Resource" id="Resource_602vj"]
+script = ExtResource("8_fvyod")
+terrain_node = NodePath("../Terrain3D")
+align_with_collision_normal = true
+enable_texture_filtering = true
+target_texture_id = 1
+
+[sub_resource type="Resource" id="Resource_gpavj"]
+script = ExtResource("2_fvyod")
+stack = Array[ExtResource("3_uk2fe")]([SubResource("Resource_xdy50"), SubResource("Resource_31kwq"), SubResource("Resource_xwpff"), SubResource("Resource_602vj")])
+
+[sub_resource type="Resource" id="Resource_akvrp"]
 script = ExtResource("10_602vj")
 radius = 2457.9114
 
 [sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
 size = Vector3(160.04765, 3.621582, 2.0020752)
 
+[sub_resource type="Environment" id="Environment_g4v7s"]
+fog_density = 0.0001
+volumetric_fog_density = 0.001
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_yf5fn"]
+dof_blur_far_distance = 4974.69
+
+[sub_resource type="Compositor" id="Compositor_57qmd"]
+
 [node name="Map01" type="Node3D" unique_id=1370876875]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=2076906278]
+transform = Transform3D(-0.95881975, -0.27041933, 0.08682216, 0, 0.30569538, 0.95212936, -0.2840153, 0.9129205, -0.29310676, 0, 34.113426, 0)
+shadow_enabled = true
 
 [node name="Terrain3D" type="Terrain3D" parent="." unique_id=1382598881]
 data_directory = "res://Resources/Terrain"
@@ -131,7 +171,7 @@ displacement_sharpness = 0.5
 top_level = true
 metadata/_edit_lock_ = true
 
-[node name="ProtonScatter" type="Node3D" parent="." unique_id=1522425902]
+[node name="ProtonScatterTree" type="Node3D" parent="." unique_id=1522425902]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 26.627785, 0)
 script = ExtResource("1_nphrk")
 modifier_stack = SubResource("Resource_63y7u")
@@ -139,17 +179,35 @@ Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://dgqq1tf8prx5s"
 
-[node name="ScatterItem" type="Node3D" parent="ProtonScatter" unique_id=1231016875]
+[node name="ScatterItem" type="Node3D" parent="ProtonScatterTree" unique_id=1231016875]
 script = ExtResource("8_31kwq")
 source_scale_multiplier = 15.0
 path = "uid://caqxfqurbp3ku"
 
-[node name="ScatterShape" type="Node3D" parent="ProtonScatter" unique_id=417230358]
+[node name="ScatterShape" type="Node3D" parent="ProtonScatterTree" unique_id=417230358]
 transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 0, 0)
 script = ExtResource("9_xwpff")
 shape = SubResource("Resource_g8bsm")
 
-[node name="Troop" parent="ProtonScatter" unique_id=84826896 instance=ExtResource("12_t613c")]
+[node name="ProtonScatter2" type="Node3D" parent="." unique_id=1628975772]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 26.627785, 0)
+script = ExtResource("1_nphrk")
+modifier_stack = SubResource("Resource_gpavj")
+Performance/use_chunks = true
+Performance/chunk_dimensions = Vector3(15, 15, 15)
+metadata/_custom_type_script = "uid://dgqq1tf8prx5s"
+
+[node name="ScatterItem" type="Node3D" parent="ProtonScatter2" unique_id=1526788116]
+script = ExtResource("8_31kwq")
+source_scale_multiplier = 15.0
+path = "uid://cia3jakp3wj1d"
+
+[node name="ScatterShape" type="Node3D" parent="ProtonScatter2" unique_id=1926381934]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 0, 0)
+script = ExtResource("9_xwpff")
+shape = SubResource("Resource_akvrp")
+
+[node name="Troop" parent="ProtonScatter2" unique_id=84826896 instance=ExtResource("12_t613c")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.422146, -25.576416, 802.3492)
 
 [node name="TestHelicopter" parent="." unique_id=753352377 instance=ExtResource("13_dwgi2")]
@@ -173,3 +231,11 @@ mesh = SubResource("BoxMesh_g4v7s")
 [node name="Hesco4" type="MeshInstance3D" parent="BaseTeam1" unique_id=1297149808]
 transform = Transform3D(-1.1920929e-07, 0, -1, 0, 1, 0, 1, 0, -1.1920929e-07, -92.75764, 1.3107872, 79.23883)
 mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=478773508]
+environment = SubResource("Environment_g4v7s")
+camera_attributes = SubResource("CameraAttributesPractical_yf5fn")
+compositor = SubResource("Compositor_57qmd")
+
+[node name="Troop" parent="." unique_id=1362365295 instance=ExtResource("12_t613c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.422146, 1.0513687, 802.3492)

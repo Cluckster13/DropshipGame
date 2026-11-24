@@ -1,8 +1,8 @@
+WorldEnvironment
 MeshInstance3D
 Node3D
 ProtonScatter
 Terrain3D
-WorldEnvironment
 Node
 Sprite3D
 Timer
