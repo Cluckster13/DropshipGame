@@ -17,7 +17,7 @@ extends CharacterBody3D
 signal arrived(troop: Troop)       ## finished a MOVING order
 signal disembarked(troop: Troop)   ## walked clear of the helicopter after unloading
 signal died(troop: Troop)
-signal contact(troop: Troop, enemy: Troop)   ## just started fighting
+signal contact(troop: Troop, enemy: Node3D)  ## just started fighting (a Troop or an aircraft)
 signal combat_ended(troop: Troop)            ## no more targets, back to previous task
 
 enum States {IDLE, MOVING, MOVING_TO_BOARD, PASSENGER, MOVING_TO_EXIT, COMBAT, DEAD}
@@ -47,6 +47,8 @@ const TEAM_ENEMY    := -1
 
 @export_group("Health")
 @export var max_health : float = 100.0
+## Falling below this world height kills the troop
+@export var kill_height : float = -300.0
 
 @export_group("Perception")
 ## How far this troop can spot enemies (m). Also the rifle's effective range.
@@ -91,7 +93,9 @@ var speed_scale : float = 1.0
 var state  : States = States.IDLE
 var health : float
 var squad  : Squad = null
-var target : Troop = null   ## who we're shooting at (COMBAT only)
+## Who we're shooting at (COMBAT only): a Troop or an aircraft (HeliBase).
+## Anything with team, is_alive() and eye_position() can be a target.
+var target : Node3D = null
 
 # Solo-mode objective (unused while in a squad; the squad tracks that)
 var target_obj : Objective = null
@@ -135,6 +139,11 @@ func _physics_process(delta: float) -> void:
 		_snap_to_seat()
 		return   # riding along: no gravity, no move_and_slide, no shooting
 
+	# Fell out of the world (spawned off the terrain, pushed through it...)
+	if global_position.y < kill_height:
+		_die()
+		return
+
 	_perception_timer -= delta
 	if _perception_timer <= 0.0:
 		_perception_timer = perception_interval
@@ -164,8 +173,18 @@ func is_available() -> bool:
 func can_fight() -> bool:
 	return state == States.IDLE or state == States.MOVING or state == States.MOVING_TO_EXIT or state == States.COMBAT
 
-func is_enemy_of(other: Troop) -> bool:
-	return other.team != team and other.team != 0 and team != 0
+func is_enemy_of(other: Node) -> bool:
+	var their_team = other.get("team")
+	return their_team is int and their_team != team and their_team != 0 and team != 0
+
+## Something we can shoot at right now: an enemy troop on the ground, or an
+## enemy aircraft that's still flying. Untyped: may be a freed object.
+func is_valid_enemy(t) -> bool:
+	if not is_instance_valid(t) or t == self or not t.has_method("is_alive") or not t.is_alive():
+		return false
+	if t is Troop and t.state == States.PASSENGER:
+		return false   # inside an aircraft: shoot the aircraft instead
+	return is_enemy_of(t)
 
 func is_alerted() -> bool:
 	return state == States.COMBAT or (squad != null and squad.in_contact)
@@ -177,24 +196,24 @@ func current_sight_range() -> float:
 func eye_position() -> Vector3:
 	return global_position + Vector3.UP * eye_height
 
-func can_see(other: Troop) -> bool:
+func can_see(other: Node3D) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(eye_position(), other.eye_position())
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.is_empty() or hit.collider == other
 
-## Nearest enemy in range with clear line of sight, or null
-func find_visible_enemy() -> Troop:
+## Nearest enemy (troop or aircraft) in range with clear line of sight, or null
+func find_visible_enemy() -> Node3D:
 	var candidates: Array = []
 	var scan_range := current_sight_range()
 	var range_sq := scan_range * scan_range
-	for node in get_tree().get_nodes_in_group("Troops"):
-		var t := node as Troop
-		if t == null or t == self or not t.is_alive() or t.state == States.PASSENGER or not is_enemy_of(t):
+	var others := get_tree().get_nodes_in_group("Troops") + get_tree().get_nodes_in_group("Aircraft")
+	for node in others:
+		if not is_valid_enemy(node):
 			continue
-		var d := global_position.distance_squared_to(t.global_position)
+		var d := eye_position().distance_squared_to(node.eye_position())
 		if d <= range_sq:
-			candidates.append([d, t])
+			candidates.append([d, node])
 	candidates.sort_custom(func(a, b): return a[0] < b[0])
 	# Only ray-test the closest few; keeps big battles cheap
 	for i in mini(candidates.size(), 4):
@@ -261,8 +280,8 @@ func take_damage(amount: float, source: Node = null) -> void:
 	if health <= 0.0:
 		_die(source)
 		return
-	# Getting shot gives away the shooter's position
-	if state != States.COMBAT and can_fight() and source is Troop and is_instance_valid(source):
+	# Getting shot gives away the shooter's position (troop or aircraft)
+	if state != States.COMBAT and can_fight() and is_valid_enemy(source):
 		_enter_combat(source)
 
 # ---------------------------------------------------------------- combat
@@ -276,7 +295,7 @@ func _perceive() -> void:
 			_enter_combat(enemy)
 		return
 
-	var target_ok := is_instance_valid(target) and target.is_alive() and target.state != States.PASSENGER
+	var target_ok := is_valid_enemy(target)
 	_target_visible = target_ok and can_see(target)
 	if _target_visible:
 		_lost_sight_time = 0.0
@@ -289,7 +308,7 @@ func _perceive() -> void:
 	elif not target_ok or _lost_sight_time >= lose_target_time:
 		_exit_combat()
 
-func _enter_combat(enemy: Troop) -> void:
+func _enter_combat(enemy: Node3D) -> void:
 	if state != States.COMBAT:
 		_resume_state = state
 		state = States.COMBAT
@@ -297,7 +316,7 @@ func _enter_combat(enemy: Troop) -> void:
 	_reaction_left = reaction_time / skill
 	contact.emit(self, enemy)
 
-func _set_target(enemy: Troop) -> void:
+func _set_target(enemy: Node3D) -> void:
 	if enemy != target:
 		_reaction_left = maxf(_reaction_left, reaction_time * 0.5 / skill)   # re-aim on switch
 	target = enemy
@@ -339,9 +358,9 @@ func _combat_tick(delta: float) -> void:
 
 ## First friendly standing within friendly_clearance of the segment from
 ## our muzzle to the target, or null if the lane is clear
-func _friendly_in_line_of_fire(enemy: Troop) -> Troop:
+func _friendly_in_line_of_fire(enemy: Node3D) -> Troop:
 	var from := eye_position()
-	var to := enemy.eye_position()
+	var to: Vector3 = enemy.eye_position()
 	var seg := to - from
 	var seg_len_sq := seg.length_squared()
 	if seg_len_sq < 0.01:
@@ -365,10 +384,15 @@ func _is_facing(flat_dir: Vector3) -> bool:
 	forward.y = 0.0
 	return forward.normalized().angle_to(flat_dir.normalized()) <= deg_to_rad(fire_cone_deg)
 
-func _fire_at(enemy: Troop) -> void:
+func _fire_at(enemy: Node3D) -> void:
 	var forward := -global_basis.z
 	var muzzle := eye_position() + forward * 0.4
-	var aim := enemy.global_position + Vector3.UP * randf_range(-0.3, 0.5)
+	var aim: Vector3
+	if enemy is Troop:
+		aim = enemy.global_position + Vector3.UP * randf_range(-0.3, 0.5)
+	else:
+		# Aircraft: aim for the cabin, anywhere on a big target
+		aim = enemy.eye_position() + Vector3(randf_range(-1.5, 1.5), randf_range(-0.8, 0.8), randf_range(-1.5, 1.5))
 	var dist := muzzle.distance_to(aim)
 
 	var spread := deg_to_rad(base_spread_deg + spread_per_meter_deg * dist) / skill
@@ -383,7 +407,7 @@ func _fire_at(enemy: Troop) -> void:
 	var hit_pos := end
 	if not hit.is_empty():
 		hit_pos = hit.position
-		if hit.collider is Troop:
+		if hit.collider.has_method("take_damage"):
 			hit.collider.take_damage(damage, self)
 
 	var col := Color(0.5, 0.7, 1.0) if team == TEAM_FRIENDLY else Color(1.0, 0.55, 0.3)
@@ -466,14 +490,51 @@ func _die(killer: Node = null) -> void:
 	died.emit(self)
 	queue_free()   # placeholder until there's a death animation / ragdoll
 
+## Re-check whether the navmesh actually connects us to the target this often
+const DIRECT_CHECK_INTERVAL := 1.0
+## Path ends this close (flat m) to us / the target = navmesh covers the trip
+const PATH_REACH_TOLERANCE := 3.0
+
+var _direct_mode : bool = false
+var _direct_check_timer : float = 0.0
+var _direct_checked_target : Vector3 = Vector3.INF
+
+## Does the navmesh link where we stand to where we're going? False when
+## either end is on unbaked ground: then the agent's path would be empty,
+## or stop short at the edge of a baked tile.
+func _path_reaches_target() -> bool:
+	var map := nav.get_navigation_map()
+	if NavigationServer3D.map_get_iteration_id(map) == 0:
+		return false
+	var path := NavigationServer3D.map_get_path(map, global_position, nav.target_position, true)
+	if path.is_empty():
+		return false
+	return _flat_dist(path[0], global_position) <= PATH_REACH_TOLERANCE \
+		and _flat_dist(path[path.size() - 1], nav.target_position) <= PATH_REACH_TOLERANCE
+
+func _flat_dist(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
+
 func _update_navigation_direction() -> void:
-	if nav.is_navigation_finished() or _is_stuck_near_goal():
+	# Pick nav-following or straight-line walking. Decided every second (or
+	# right away when the goal moves) instead of every frame, so troops
+	# don't flicker between the two at the edge of a baked tile.
+	_direct_check_timer -= get_physics_process_delta_time()
+	if _direct_check_timer <= 0.0 or nav.target_position.distance_to(_direct_checked_target) > 5.0:
+		_direct_check_timer = DIRECT_CHECK_INTERVAL * randf_range(0.8, 1.2)
+		_direct_checked_target = nav.target_position
+		_direct_mode = not _path_reaches_target()
+
+	var arrived_direct := _direct_mode and _flat_dist(nav.target_position, global_position) <= arrival_distance
+	var arrived_nav := not _direct_mode and nav.is_navigation_finished()
+	if arrived_nav or arrived_direct or _is_stuck_near_goal():
 		direction = Vector3.ZERO
 		_stuck_time = 0.0
 		_on_arrived()
 		return
 
-	var to_next: Vector3 = nav.get_next_path_position() - global_position
+	var next_point: Vector3 = nav.target_position if _direct_mode else nav.get_next_path_position()
+	var to_next: Vector3 = next_point - global_position
 	to_next.y = 0.0
 	if to_next.length_squared() <= 0.001:
 		direction = Vector3.ZERO

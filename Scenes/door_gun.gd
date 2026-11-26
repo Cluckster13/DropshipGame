@@ -105,6 +105,8 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_cooldown -= delta
+	if aircraft and aircraft.has_method("is_alive") and not aircraft.is_alive():
+		return   # shot down: guns are silent
 	if manual_control:
 		_slew_toward(manual_aim_point, manual_slew_speed_deg, delta)
 		if trigger_held and _cooldown <= 0.0:
@@ -225,7 +227,8 @@ func _fire(spread_deg: float) -> void:
 	if not hit.is_empty():
 		hit_pos = hit.position
 		if hit.collider is Troop:
-			hit.collider.take_damage(damage, self)
+			# Credit the aircraft, so whoever survives knows to shoot back at it
+			hit.collider.take_damage(damage, aircraft if aircraft else self)
 	Tracer.spawn(get_tree().current_scene, from, hit_pos, Color(1.0, 0.85, 0.3))
 
 func _raycast(from: Vector3, to: Vector3) -> Dictionary:

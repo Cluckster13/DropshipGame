@@ -96,8 +96,13 @@ func _set_freelook(active: bool) -> void:
 
 func _collide_camera(origin: Vector3, desired: Vector3) -> Vector3:
 	var space_state := get_world_3d().direct_space_state
+	# Start a metre up: the aircraft origin sits at skid level, so a ray from
+	# there can begin inside the ground and pin the camera under the aircraft
+	origin += Vector3.UP
 	var params      := PhysicsRayQueryParameters3D.create(origin, desired)
-	params.exclude  = [_target_node]
+	# exclude takes RIDs, not nodes: passing the node let the ray hit our own hull
+	if _target_node is CollisionObject3D:
+		params.exclude = [(_target_node as CollisionObject3D).get_rid()]
 	var result      := space_state.intersect_ray(params)
 	if result:
 		var to_cam : Vector3 = (desired - origin).normalized()

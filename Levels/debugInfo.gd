@@ -7,12 +7,14 @@ extends Control
 @onready var aitext: RichTextLabel = $AItext
 
 # Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+## Debug readout. F3 toggles it.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		visible = not visible
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	if not visible:
+		return
 	heli_text.text = str(test_helicopter.get_debug_info())
 	if not is_instance_valid(friendly_troop) or not friendly_troop.is_alive():
 		friendly_troop = _find_replacement()

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SquadType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/squad_type.gd" id="1_st"]
+
+[resource]
+script = ExtResource("1_st")
+display_name = "Militia"
+tier = 1
+description = "Cheap, quick to raise, barely trained. Poor shots who break easily. Good for padding a defence."
+cost = 100
+size = 4
+skill = 0.75
+max_health = 80.0
+move_speed = 3.8

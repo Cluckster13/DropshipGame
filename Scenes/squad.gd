@@ -274,7 +274,7 @@ func _ring_offset(i: int, count: int) -> Vector3:
 
 ## Halt and fight: the whole squad stops where it is. Whoever can see an
 ## enemy shoots; the rest hold position. Order is kept and resumed later.
-func _on_member_contact(_troop: Troop, enemy: Troop) -> void:
+func _on_member_contact(_troop: Troop, enemy: Node3D) -> void:
 	last_contact_position = enemy.global_position
 	known_enemies[enemy] = _now()
 	_contact_clear_timer = 0.0

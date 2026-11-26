@@ -16,6 +16,8 @@ const TICK_TIME   : float = 0.1
 @export var decay_rate     : float = 0.5   ## drift per tick back toward the owner when empty
 ## Who holds this point when the level starts (1 friendly, 0 neutral, -1 enemy)
 @export_range(-1, 1, 1) var initial_owner : int = 0
+## Name shown on the HUD. Empty = node name minus "Objective_" (e.g. "A")
+@export var display_name : String = ""
 
 var capture_progress : float = 0.0
 var owner_team : int = 0
@@ -50,6 +52,34 @@ static func nearest_not_owned_by(tree: SceneTree, from: Vector3, team: int) -> O
 			best_dist = d
 			best = obj
 	return best
+
+## Short name for HUDs and markers: display_name, else the node name minus
+## "Objective_" (Objective_A -> "A")
+func get_label() -> String:
+	return display_name if display_name != "" else str(name).trim_prefix("Objective_")
+
+## What's happening here right now, from the player's side. Shared by the
+## HUD and the in-world marker so they always say the same thing.
+##   text      - CONTESTED / CAPTURING / UNDER ATTACK / ENEMY CAPTURING /
+##               SECURED / ENEMY / NEUTRAL
+##   team      - whose colour to show it in (1, -1, or 0 for neutral)
+##   active    - someone is changing the bar (worth showing a percentage)
+##   contested - both sides inside
+func status() -> Dictionary:
+	var friendlies := count_team(Troop.TEAM_FRIENDLY)
+	var enemies := count_team(Troop.TEAM_ENEMY)
+	if friendlies > 0 and enemies > 0:
+		return {"text": "CONTESTED", "team": 0, "active": false, "contested": true}
+	if friendlies > 0 and capture_progress < CAPTURE_MAX:
+		return {"text": "CAPTURING", "team": Troop.TEAM_FRIENDLY, "active": true, "contested": false}
+	if enemies > 0 and capture_progress > -CAPTURE_MAX:
+		var t := "UNDER ATTACK" if owner_team == Troop.TEAM_FRIENDLY else "ENEMY CAPTURING"
+		return {"text": t, "team": Troop.TEAM_ENEMY, "active": true, "contested": false}
+	if owner_team == Troop.TEAM_FRIENDLY:
+		return {"text": "SECURED", "team": owner_team, "active": false, "contested": false}
+	if owner_team == Troop.TEAM_ENEMY:
+		return {"text": "ENEMY", "team": owner_team, "active": false, "contested": false}
+	return {"text": "NEUTRAL", "team": 0, "active": false, "contested": false}
 
 func count_team(team: int) -> int:
 	var n := 0

@@ -10,9 +10,14 @@
 [ext_resource type="Script" uid="uid://d4iix0xfovypl" path="res://Scenes/door_gun.gd" id="7_1qnl8"]
 [ext_resource type="PackedScene" uid="uid://b8e5eya8fgpm2" path="res://Scenes/loading_trigger.tscn" id="7_y27xj"]
 [ext_resource type="Script" uid="uid://dcc7c6josmxe2" path="res://Scenes/gunner_controller.gd" id="8_gk8nd"]
+[ext_resource type="Script" uid="uid://b3vbb8w6lfvp8" path="res://Scenes/flight_hud.gd" id="11_gqdeq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
 size = Vector3(5.5733643, 5.1016846, 25.402832)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_g4v7s"]
+height = 0.41870117
+radius = 12.121094
 
 [node name="TestHelicopter" type="RigidBody3D" unique_id=753352377]
 collision_layer = 2
@@ -26,6 +31,7 @@ cyclic_pitch_strength = 10.0
 cyclic_roll_strength = 1.25
 antitorque_strength = 10.0
 hover_stability_strength = 0.1
+rotor_spool_up_rate = 10.0
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1881279923]
 transform = Transform3D(-1, 2.0813246e-08, -8.4909075e-08, 0, 0.9712466, 0.2380758, 8.742278e-08, 0.2380758, -0.9712466, 0.03514242, 8.594946, -17.02816)
@@ -147,5 +153,12 @@ minigun_mesh_rotation_deg = Vector3(0, 90, 0)
 script = ExtResource("8_gk8nd")
 guns = [NodePath("../DoorGunLeft"), NodePath("../DoorGunRight")]
 orbit_camera = NodePath("../Camera3D")
+
+[node name="FlightHUD" type="CanvasLayer" parent="." unique_id=1722375181]
+script = ExtResource("11_gqdeq")
+
+[node name="RotorCollision" type="CollisionShape3D" parent="." unique_id=1827225395]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.444254, 4.100878)
+shape = SubResource("CylinderShape3D_g4v7s")
 
 [editable path="BlackhawkV2"]

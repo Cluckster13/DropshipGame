@@ -1,0 +1,314 @@
+[gd_scene format=3 uid="uid://kd2ct01s6gl3"]
+
+[ext_resource type="Texture2D" uid="uid://ccp3dlv58ofm" path="res://Assets/Textures/Rock051_1K-PNG_Color.png" id="1_tgjjd"]
+[ext_resource type="PackedScene" uid="uid://714h6hneyr13" path="res://Scenes/Objective.tscn" id="2_2vmyw"]
+[ext_resource type="Texture2D" uid="uid://bfif4lwmyuyaw" path="res://Assets/Textures/Rock051_1K-PNG_NormalGL.png" id="2_6f3q8"]
+[ext_resource type="PackedScene" uid="uid://caqxfqurbp3ku" path="res://addons/proton_scatter/demos/assets/pine_tree.tscn" id="2_uui03"]
+[ext_resource type="PackedScene" uid="uid://b8abs8me7ckgo" path="res://addons/proton_scatter/demos/assets/bush.tscn" id="3_2vmyw"]
+[ext_resource type="Texture2D" uid="uid://cohr65fs6ptmu" path="res://Assets/Textures/Grass004_1K-PNG_Color.png" id="3_a1g84"]
+[ext_resource type="PackedScene" uid="uid://be6nrf0b8j4l0" path="res://demo/assets/models/RockA.tscn" id="4_6u4ja"]
+[ext_resource type="Texture2D" uid="uid://dbvt7c4tntd6e" path="res://Assets/Textures/Grass004_1K-PNG_NormalGL.png" id="4_ep3nx"]
+[ext_resource type="Script" uid="uid://dgqq1tf8prx5s" path="res://addons/proton_scatter/src/scatter.gd" id="5_5pfs7"]
+[ext_resource type="PackedScene" uid="uid://bwvtgwartxt0g" path="res://demo/assets/models/RockB.tscn" id="5_r3aaa"]
+[ext_resource type="Material" uid="uid://cgk4glwmc4vk2" path="res://addons/terrain_3d/extras/shaders/M_ocean.tres" id="6_6f3q8"]
+[ext_resource type="Script" uid="uid://ba8jou0xje0c7" path="res://addons/proton_scatter/src/stack/modifier_stack.gd" id="6_dvvgu"]
+[ext_resource type="PackedScene" uid="uid://lsvs8a7urkca" path="res://demo/assets/models/RockC.tscn" id="6_en4yh"]
+[ext_resource type="Script" uid="uid://b5s7ggmsi8g5u" path="res://addons/proton_scatter/src/modifiers/base_modifier.gd" id="7_uui03"]
+[ext_resource type="Script" uid="uid://gjjh4mw1wn51" path="res://addons/proton_scatter/src/modifiers/create_inside_random.gd" id="8_2vmyw"]
+[ext_resource type="Script" uid="uid://b0332hlb7q5t1" path="res://addons/proton_scatter/src/modifiers/randomize_transforms.gd" id="9_6u4ja"]
+[ext_resource type="Script" uid="uid://dc4rwlje6dfca" path="res://addons/proton_scatter/src/modifiers/relax.gd" id="10_r3aaa"]
+[ext_resource type="Script" uid="uid://w6hwy0ffji12" path="res://addons/proton_scatter/src/modifiers/project_on_terrain3d.gd" id="11_en4yh"]
+[ext_resource type="Script" uid="uid://c85i0481q4uog" path="res://addons/proton_scatter/src/scatter_item.gd" id="12_wkr1h"]
+[ext_resource type="Script" uid="uid://dx7e7heldjwmg" path="res://addons/proton_scatter/src/scatter_shape.gd" id="13_f65ru"]
+[ext_resource type="Script" uid="uid://ba7ljvtfgk4cp" path="res://addons/proton_scatter/src/shapes/sphere_shape.gd" id="14_ylggi"]
+[ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="15_ylspc"]
+[ext_resource type="Script" uid="uid://ex1f0cbtnxxt" path="res://Scenes/buy_zone.gd" id="23_6u4ja"]
+[ext_resource type="Script" uid="uid://d0egvfs78imo7" path="res://Scenes/nav_patch_baker.gd" id="24_r3aaa"]
+[ext_resource type="Script" uid="uid://rq2gx6lv2rnt" path="res://Scenes/battle_manager.gd" id="25_en4yh"]
+
+[sub_resource type="Environment" id="Environment_g4v7s"]
+fog_density = 0.0001
+volumetric_fog_density = 0.001
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_yf5fn"]
+dof_blur_far_distance = 4974.69
+
+[sub_resource type="Compositor" id="Compositor_57qmd"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_6f3q8"]
+cell_size = 0.5
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_tpmar"]
+_shader_parameters = {
+&"auto_base_texture": null,
+&"auto_height_reduction": null,
+&"auto_overlay_texture": null,
+&"auto_shader": null,
+&"auto_slope": null,
+&"bias_distance": null,
+&"blend_sharpness": null,
+&"depth_blur": null,
+&"distant_normal_scale": null,
+&"flat_terrain_normals": null,
+&"general_uniforms": null,
+&"ground_level": null,
+&"mipmap_bias": null,
+&"mipmaps": null,
+&"private": null,
+&"region_blend": null
+}
+auto_shader_enabled = true
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_fwwe5"]
+name = "pine_tree"
+scene_file = ExtResource("2_uui03")
+density = 1.3219845
+last_lod = 1
+last_shadow_lod = 1
+lod0_range = 500.0
+lod1_range = 1750.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_wkr1h"]
+name = "bush"
+id = 1
+scene_file = ExtResource("3_2vmyw")
+density = 6.206778
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_f65ru"]
+name = "RockA"
+id = 2
+scene_file = ExtResource("4_6u4ja")
+density = 0.036441512
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ylggi"]
+name = "RockB"
+id = 3
+scene_file = ExtResource("5_r3aaa")
+density = 0.029499011
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ylspc"]
+name = "RockC"
+id = 4
+scene_file = ExtResource("6_en4yh")
+density = 0.014639318
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_602vj"]
+name = "Rock051_1K-PNG_Color"
+albedo_texture = ExtResource("1_tgjjd")
+normal_texture = ExtResource("2_6f3q8")
+uv_scale = 0.006
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_j14xw"]
+name = "Grass"
+id = 1
+albedo_texture = ExtResource("3_a1g84")
+normal_texture = ExtResource("4_ep3nx")
+roughness = 1.0
+
+[sub_resource type="Terrain3DAssets" id="Terrain3DAssets_ji6jo"]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_fwwe5"), SubResource("Terrain3DMeshAsset_wkr1h"), SubResource("Terrain3DMeshAsset_f65ru"), SubResource("Terrain3DMeshAsset_ylggi"), SubResource("Terrain3DMeshAsset_ylspc")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_602vj"), SubResource("Terrain3DTextureAsset_j14xw")])
+
+[sub_resource type="Resource" id="Resource_wkr1h"]
+script = ExtResource("8_2vmyw")
+amount = 2000
+override_global_seed = true
+restrict_height = true
+reference_frame = 1
+
+[sub_resource type="Resource" id="Resource_f65ru"]
+script = ExtResource("9_6u4ja")
+position = Vector3(0.15, 0.15, 0.15)
+rotation = Vector3(20, 360, 20)
+scale = Vector3(0.1, 0.1, 0.1)
+override_global_seed = true
+reference_frame = 2
+
+[sub_resource type="Resource" id="Resource_ylggi"]
+script = ExtResource("10_r3aaa")
+offset_step = 0.2
+consecutive_step_multiplier = 0.75
+restrict_height = true
+
+[sub_resource type="Resource" id="Resource_ylspc"]
+script = ExtResource("11_en4yh")
+terrain_node = NodePath("../Terrain3D")
+align_with_collision_normal = true
+enable_texture_filtering = true
+target_texture_id = 1
+
+[sub_resource type="Resource" id="Resource_kss8a"]
+script = ExtResource("6_dvvgu")
+stack = Array[ExtResource("7_uui03")]([SubResource("Resource_wkr1h"), SubResource("Resource_f65ru"), SubResource("Resource_ylggi"), SubResource("Resource_ylspc")])
+
+[sub_resource type="Resource" id="Resource_g8bsm"]
+script = ExtResource("14_ylggi")
+radius = 2457.9114
+
+[sub_resource type="Resource" id="Resource_xdy50"]
+script = ExtResource("14_ylggi")
+radius = 147.20679
+
+[sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
+size = Vector3(160.04765, 3.621582, 2.0020752)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_g4v7s"]
+radius = 87.57978
+
+[node name="Valley_Map" type="Node3D" unique_id=1370876875]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=478773508]
+environment = SubResource("Environment_g4v7s")
+camera_attributes = SubResource("CameraAttributesPractical_yf5fn")
+compositor = SubResource("Compositor_57qmd")
+
+[node name="Entities" type="Node" parent="." unique_id=228713562]
+
+[node name="TestHelicopter" parent="Entities" unique_id=753352377 instance=ExtResource("15_ylspc")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -53.14979, 2.110949, 838.83386)
+
+[node name="Objective_A" parent="Entities" unique_id=1836356735 instance=ExtResource("2_2vmyw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -783.76514, 7.6006317, -861.9842)
+
+[node name="Objective_B" parent="Entities" unique_id=1479067263 instance=ExtResource("2_2vmyw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 230.23486, -0.6967547, -1296.9841)
+
+[node name="Objective_C" parent="Entities" unique_id=702246049 instance=ExtResource("2_2vmyw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2509.3088, -0.2164731, -2320.9507)
+
+[node name="World" type="Node" parent="." unique_id=329422212]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World" unique_id=2076906278]
+transform = Transform3D(-0.95881975, -0.27041933, 0.08682216, 0, 0.30569538, 0.95212936, -0.2840153, 0.9129205, -0.29310676, 0, 34.113426, 0)
+shadow_enabled = true
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="World" unique_id=1694052164]
+navigation_mesh = SubResource("NavigationMesh_6f3q8")
+
+[node name="Terrain3D" type="Terrain3D" parent="World/NavigationRegion3D" unique_id=1382598881]
+data_directory = "res://Resources/Terrain"
+material = SubResource("Terrain3DMaterial_tpmar")
+assets = SubResource("Terrain3DAssets_ji6jo")
+collision_mode = 3
+collision_layer = 7
+collision_mask = 7
+displacement_sharpness = 0.5
+ocean_material = ExtResource("6_6f3q8")
+top_level = true
+metadata/_edit_lock_ = true
+
+[node name="ProtonScatterTree" type="Node3D" parent="World" unique_id=1522425902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 26.627785, 0)
+script = ExtResource("5_5pfs7")
+keep_static_colliders = true
+force_rebuild_on_load = false
+modifier_stack = SubResource("Resource_kss8a")
+Performance/use_chunks = true
+Performance/chunk_dimensions = Vector3(15, 15, 15)
+metadata/_custom_type_script = "uid://dgqq1tf8prx5s"
+
+[node name="ScatterItemTree" type="Node3D" parent="World/ProtonScatterTree" unique_id=1231016875]
+script = ExtResource("12_wkr1h")
+source_scale_multiplier = 15.0
+path = "uid://caqxfqurbp3ku"
+
+[node name="ScatterItemGrass" type="Node3D" parent="World/ProtonScatterTree" unique_id=1192241377]
+script = ExtResource("12_wkr1h")
+source_scale_multiplier = 15.0
+path = "uid://b8abs8me7ckgo"
+
+[node name="ScatterItemLRock" type="Node3D" parent="World/ProtonScatterTree" unique_id=397213612]
+script = ExtResource("12_wkr1h")
+source_scale_multiplier = 5.0
+path = "uid://8ay5rlrutcmx"
+
+[node name="ScatterShape" type="Node3D" parent="World/ProtonScatterTree" unique_id=417230358]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 0, 0)
+script = ExtResource("13_f65ru")
+shape = SubResource("Resource_g8bsm")
+
+[node name="ScatterShape2" type="Node3D" parent="World/ProtonScatterTree" unique_id=850927214]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, -3.8956242, -24.459957, 830.7668)
+script = ExtResource("13_f65ru")
+negative = true
+shape = SubResource("Resource_xdy50")
+
+[node name="BaseTeam1" type="Node3D" parent="World" unique_id=68142245]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 741.1401)
+
+[node name="Hesco" type="MeshInstance3D" parent="World/BaseTeam1" unique_id=1533002780]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.533073, 1.310791, 0.5010376)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco2" type="MeshInstance3D" parent="World/BaseTeam1" unique_id=1252054017]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 66.95331, 1.310791, 79.64429)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco3" type="MeshInstance3D" parent="World/BaseTeam1" unique_id=1242534063]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -13.034775, 1.310791, 158.65308)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco4" type="MeshInstance3D" parent="World/BaseTeam1" unique_id=1297149808]
+transform = Transform3D(-1.1920929e-07, 0, -1, 0, 1, 0, 1, 0, -1.1920929e-07, -92.75764, 1.3107872, 79.23883)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="BasePlayerCheck" type="Area3D" parent="World/BaseTeam1" unique_id=29335615 node_paths=PackedStringArray("squad_parent")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.340851, 0, 75.64557)
+script = ExtResource("23_6u4ja")
+squad_parent = NodePath("../../../Entities")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/BaseTeam1/BasePlayerCheck" unique_id=1711433763]
+shape = SubResource("SphereShape3D_g4v7s")
+
+[node name="BaseTeam0" type="Node3D" parent="World" unique_id=348218903]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3933.9912)
+
+[node name="Hesco" type="MeshInstance3D" parent="World/BaseTeam0" unique_id=1284305090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.533073, 1.310791, 0.5010376)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco2" type="MeshInstance3D" parent="World/BaseTeam0" unique_id=754198776]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 66.95331, 1.310791, 79.64429)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco3" type="MeshInstance3D" parent="World/BaseTeam0" unique_id=2128082180]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -13.034775, 1.310791, 158.65308)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="Hesco4" type="MeshInstance3D" parent="World/BaseTeam0" unique_id=2128430213]
+transform = Transform3D(-1.1920929e-07, 0, -1, 0, 1, 0, 1, 0, -1.1920929e-07, -92.75764, 1.3107872, 79.23883)
+mesh = SubResource("BoxMesh_g4v7s")
+
+[node name="BasePlayerCheck" type="Area3D" parent="World/BaseTeam0" unique_id=39247860]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.340851, 0, 75.64557)
+visible = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/BaseTeam0/BasePlayerCheck" unique_id=24939145]
+shape = SubResource("SphereShape3D_g4v7s")
+
+[node name="EnemySpawn" type="Marker3D" parent="World/BaseTeam0" unique_id=1709785480]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.34, 0, 75.65)
+
+[node name="NavPatchBaker" type="Node" parent="World" unique_id=1702145629 node_paths=PackedStringArray("terrain", "obstacle_root", "anchors")]
+script = ExtResource("24_r3aaa")
+terrain = NodePath("../NavigationRegion3D/Terrain3D")
+obstacle_root = NodePath("../ProtonScatterTree")
+anchors = [NodePath("../BaseTeam1/BasePlayerCheck"), NodePath("../BaseTeam0/EnemySpawn")]
+log_timing = true
+
+[node name="BattleManager" type="Node" parent="World" unique_id=1046702496 node_paths=PackedStringArray("spawn_points", "squad_parent")]
+script = ExtResource("25_en4yh")
+spawn_points = [NodePath("../BaseTeam0/EnemySpawn")]
+squad_parent = NodePath("../../Entities")

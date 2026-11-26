@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SquadType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/squad_type.gd" id="1_st"]
+
+[resource]
+script = ExtResource("1_st")
+display_name = "Rangers"
+tier = 3
+description = "Elite assault troops. Accurate, fast to react, tougher and quicker on their feet. Expensive."
+cost = 500
+size = 6
+skill = 1.35
+max_health = 130.0
+move_speed = 4.6

@@ -13,6 +13,9 @@ extends Node3D
 ## Seconds airborne before troops still walking to the door give up
 @export var takeoff_cancel_delay : float = 0.5
 
+## Fired when troops start getting out (NavPatchBaker bakes nav around here)
+signal unloading_started(where: Vector3)
+
 var seats: Dictionary = {}
 var _is_unloading: bool = false
 var _airborne_time: float = 0.0
@@ -54,6 +57,25 @@ func free_seat_count() -> int:
 	var n := 0
 	for seat_name in seats:
 		if not seats[seat_name]["occupied"]:
+			n += 1
+	return n
+
+func seat_count() -> int:
+	return seats.size()
+
+## Troops actually sitting in the aircraft
+func passenger_count() -> int:
+	return _count_state(Troop.States.PASSENGER)
+
+## Troops with a reserved seat who are still walking to the door
+func boarding_count() -> int:
+	return _count_state(Troop.States.MOVING_TO_BOARD)
+
+func _count_state(s: Troop.States) -> int:
+	var n := 0
+	for seat_name in seats:
+		var occupant = seats[seat_name]["occupant"]
+		if is_instance_valid(occupant) and occupant is Troop and occupant.state == s:
 			n += 1
 	return n
 
@@ -99,6 +121,8 @@ func unload_all() -> void:
 		print("[PassengerHandler] Can't unload: aircraft must be landed")
 		return
 	_is_unloading = true
+	if passenger_count() > 0:
+		unloading_started.emit(global_position)
 	var left_slot  := 0
 	var right_slot := 0
 

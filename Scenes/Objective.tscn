@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://714h6hneyr13"]
 
 [ext_resource type="Script" uid="uid://cgbcrkbjrl2x5" path="res://Scenes/objective.gd" id="1_16o3d"]
+[ext_resource type="Script" uid="uid://dve4tja42qcaw" path="res://Scenes/objective_marker.gd" id="2_ear84"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_64tgw"]
 height = 4.364258
@@ -20,9 +21,6 @@ size = Vector3(1.5620117, 0.9069824, 0.0078125)
 height = 4.6921387
 radius = 25.083984
 
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_g4v7s"]
-size = Vector2(2000, 2000)
-
 [node name="Objective_A" type="StaticBody3D" unique_id=1836356735 groups=["Objectives"]]
 script = ExtResource("1_16o3d")
 
@@ -31,11 +29,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.126709, 0)
 shape = SubResource("CylinderShape3D_64tgw")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=96333055]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.163086, 0)
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 6.160506, 0)
 mesh = SubResource("CylinderMesh_g4v7s")
 
 [node name="Flag" type="MeshInstance3D" parent="." unique_id=984104561]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8148916, 3.841291, -0.0013183355)
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 2.3634875, 11.270138, -0.0013183355)
 mesh = SubResource("BoxMesh_yf5fn")
 surface_material_override/0 = SubResource("StandardMaterial3D_16o3d")
 
@@ -49,9 +47,9 @@ shape = SubResource("CylinderShape3D_g4v7s")
 wait_time = 0.25
 
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=333649275]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 126.72489, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 135.89694, 0)
 billboard = 1
-texture = SubResource("PlaceholderTexture2D_g4v7s")
+script = ExtResource("2_ear84")
 
 [connection signal="body_entered" from="CaptureArea" to="." method="_on_capture_area_body_entered"]
 [connection signal="body_exited" from="CaptureArea" to="." method="_on_capture_area_body_exited"]
