@@ -1,83 +1,94 @@
-## HeliController.gd
-## Attach to your TestHelicopter (RigidBody3D).
-## Requires: RigidBody3D as root, CollisionShape3D child.
+## HeliBase: helicopter flight model, Arma / Wardogs style.
+## Attach to the helicopter's RigidBody3D (needs a CollisionShape3D child).
 ##
 ## Controls:
-##   Shift / Ctrl   — Collective up / down  (gradual spool)
-##   A / D          — Anti-torque (yaw left / right)
-##   W / S          — Cyclic pitch (nose down / up)
-##   Q / E          — Cyclic roll (bank left / right)
-##   EngineToggle   — Start / shut down engine
+##   Shift / Ctrl   - Collective up / down. Released: returns to hover power
+##                    in the air, to ground idle on the ground.
+##   W / S          - Pitch (nose down / up)
+##   Q / E          - Roll (bank left / right)
+##   A / D          - Pedals (yaw left / right)
+##   EngineToggle   - Start / shut down engine
+##
+## How it flies (deliberately few moving parts):
+##   - ONE force holds it up: rotor thrust along the aircraft's up axis.
+##     Neutral collective = exactly its weight. Tilt the rotor and part of
+##     that thrust goes sideways instead of up, so you sink unless you pull
+##     more collective. No hidden lift compensation.
+##   - Two real rotor effects add a little: translational lift (cleaner air
+##     once moving) and flare lift (pull the nose up at speed and air rams
+##     up through the disc, so the aircraft balloons, like Arma flares).
+##   - Fuselage drag per body axis: slim nose-on, big side-on and belly-on.
+##     Momentum carries; going sideways or belly-first bleeds speed fast.
+##   - Cyclic and pedals command a rotation RATE. Let go and the aircraft
+##     holds its attitude (it doesn't auto-level), like Arma's standard model.
+##   - The tail weathervanes the nose into the airflow at speed unless you
+##     hold a pedal, which is what makes banked turns and J-hooks work.
 
 extends RigidBody3D
 class_name HeliBase
 
-# ─── Collective ───────────────────────────────────────────────────────────────
-## All force/torque values are multipliers of the helicopter's weight force (mass × gravity).
-## This makes them scale correctly regardless of what mass is set to.
-## Weight force at default 800 kg = 800 × 9.8 = 7840 N
-@export var collective_max_force    : float = 1.2
-@export var collective_spool_speed  : float = 0.8    ## How fast collective responds (0–1 per second)
-@export var collective_decay_rate   : float = 0.3    ## How fast collective bleeds off when idle
-@export var collective_idle : float = 0.5
+# ─── Rotor ────────────────────────────────────────────────────────────────────
+@export_group("Rotor")
+## Thrust at full collective, in multiples of the aircraft's weight.
+## 1.6 = can climb hard and hold altitude up to ~50° of tilt.
+@export var max_thrust_g : float = 1.6
+## Thrust at bottom collective (fast descent, never zero)
+@export var min_thrust_g : float = 0.3
+## How fast the collective moves while a key is held (full travel per second)
+@export var collective_rate : float = 1.0
+## How fast it returns to hover / ground idle when keys are released
+@export var collective_return_rate : float = 1.5
+## Extra thrust once moving through clean air (0.06 = +6%). Keep it small:
+## it's what lets a tilted aircraft hold altitude without extra collective.
+@export var translational_lift_bonus : float = 0.06
+## Heave damping: thrust lost per m/s of climb (and gained per m/s of
+## descent), in g. Makes vertical speed settle quickly once you let go of
+## the collective instead of coasting. Sets max climb/descent rate too:
+## (max_thrust_g - 1) / this = 15 m/s climb, (1 - min_thrust_g) / this = 17 m/s sink.
+@export var heave_damping : float = 0.04
+## Speed range (m/s) over which translational lift builds up
+@export var translational_lift_speeds : Vector2 = Vector2(8.0, 22.0)
+## Flare lift: extra thrust (in g) per m/s of air coming up through the rotor
+## disc. Nose up at speed = air rams up through the disc = balloon.
+@export var flare_lift_gain : float = 0.008
+@export var flare_lift_max_g : float = 0.5
+@export var ground_effect_max_height : float = 4.0
+@export var ground_effect_lift_bonus : float = 0.12
 
-# ─── Cyclic (pitch / roll) ────────────────────────────────────────────────────
-@export var cyclic_pitch_strength   : float = 3.0    ## Forward/back torque multiplier
-@export var cyclic_roll_strength    : float = 0.8    ## Left/right torque multiplier — lower = less twitchy
-@export var cyclic_angular_damping  : float = 0.25   ## Resistive torque multiplier — prevents spin-out
+# ─── Controls ─────────────────────────────────────────────────────────────────
+@export_group("Controls")
+## Rotation rate at full stick / pedal (degrees per second)
+@export var pitch_rate_deg : float = 50.0
+@export var roll_rate_deg  : float = 80.0
+@export var yaw_rate_deg   : float = 70.0
+## How snappily the aircraft reaches the commanded rate (higher = twitchier)
+@export var control_response : float = 5.0
+## At speed, turns the nose into the airflow when no pedal is held.
+## Degrees/s of yaw per degree of sideslip.
+@export var weathervane_strength : float = 1.2
+## Speed (m/s) at which weathervaning is at full strength
+@export var weathervane_full_speed : float = 30.0
 
-# ─── Anti-torque (yaw / tail rotor) ──────────────────────────────────────────
-@export var antitorque_strength         : float = 1.5
-@export var antitorque_auto_correction  : float = 0.1
-
-# ─── Feel / Physics ───────────────────────────────────────────────────────────
-@export var hover_stability_strength    : float = 3.0
-@export var translational_lift_bonus    : float = 0.15
-## Adds back the lift lost when the rotor tilts, so pitching forward turns
-## into forward acceleration instead of sinking. 0 = realistic (pilot must
-## add collective), 1 = altitude fully held at any tilt. Capped at 60° tilt.
-@export_range(0.0, 1.0, 0.05) var tilt_lift_compensation : float = 0.8
-## Compensation is full up to this tilt...
-@export var tilt_compensation_full_deg : float = 25.0
-## ...and fades to nothing by this tilt. Past it the rotor behaves like a
-## rotor: tip it way over and lift goes sideways, it doesn't become a jet.
-@export var tilt_compensation_zero_deg : float = 50.0
-
-## Never-exceed speed. Above it drag climbs steeply (retreating blade stall
-## territory), so top speed in level flight lands a bit above this and even
-## a full-power dive only goes ~15-20 km/h further.
-@export var vne_kmh : float = 240.0
-@export var vne_drag : float = 0.08
-## Tilting far past a normal flying attitude turns the belly into the
-## airflow: forward drag multiplies by up to 1 + this (at 80°+ tilt)
-@export var belly_drag_multiplier : float = 6.0
-@export var belly_drag_start_deg : float = 40.0
-@export var ground_effect_max_height    : float = 4.0
-@export var ground_effect_lift_bonus    : float = 0.18
-
-## Directional drag — forward drag is much lower than lateral/vertical
-## so the helicopter builds forward speed like a real aircraft instead of
-## being slowed equally in all directions.
-## Values are drag coefficients (force = -velocity * coefficient * mass)
-## Drag is measured along the aircraft's flat heading (yaw only), NOT its
-## tilted body, so pitching the nose down doesn't turn forward speed into
-## "vertical" drag.
-@export var drag_forward   : float = 0.01    ## Linear part — small, so it accelerates out of a hover briskly
-## Quadratic part (× speed²) — negligible at low speed, sets top speed.
-## 0.0006 ≈ 200 km/h at 10° nose-down, ~290 km/h at 20°.
-@export var drag_forward_quadratic : float = 0.0006
-## Sideways / vertical include the 0.1 that used to come from the project's
-## hidden default damping, so they feel the same as before.
-@export var drag_sideways  : float = 0.45   ## High — lateral movement resisted
-@export var drag_vertical  : float = 0.30   ## Medium — vertical drift dampened (world up/down)
+# ─── Fuselage drag ────────────────────────────────────────────────────────────
+@export_group("Drag")
+## Overall drag. With the areas below, top level-flight speed is ~270 km/h.
+@export var drag_coefficient : float = 0.0022
+## Relative areas facing each direction: nose-on, side-on, belly/top-on
+@export var area_front    : float = 0.3
+@export var area_side     : float = 1.0
+@export var area_vertical : float = 1.2
+## Small linear drag so a hover settles instead of drifting forever
+@export var low_speed_drag : float = 0.05
 
 # ─── Rotor RPM ────────────────────────────────────────────────────────────────
+@export_group("Engine")
 @export var rotor_rpm_max          : float = 258.0
 @export var rotor_rpm_idle         : float = 80.0
 @export var rotor_spool_up_rate    : float = 60.0
 @export var rotor_spool_down_rate  : float = 30.0
 
 # ─── Landing (used to gate troop loading / unloading) ───────────────────────
+@export_group("Landing")
 @export var landed_check_distance : float = 1.5   ## Skids within this of the ground (m)
 @export var landed_max_speed      : float = 1.5   ## And moving slower than this (m/s)
 
@@ -114,38 +125,35 @@ var _last_velocity : Vector3 = Vector3.ZERO
 var rotor_rpm_current : float = 0.0
 var engine_on         : bool  = false
 
-# Internal state
+# Collective: 0 = bottom, 0.5 = hover thrust (1 g), 1 = max thrust
 var _collective_current : float = 0.0
 var _collective_target  : float = 0.0
+var _on_ground : bool = true
+# Read in _process, used in _integrate_forces
+var _input_pitch : float = 0.0
+var _input_roll  : float = 0.0
+var _input_yaw   : float = 0.0
 
 func _ready() -> void:
-	gravity_scale  = 1.0
-	linear_damp    = 0.0   ## Disabled — we apply directional drag manually in _apply_drag()
-	# REPLACE, not the default COMBINE: otherwise the project's default
-	# linear damp (0.1) is still added on top and acts as hidden drag in
-	# every direction, which was capping forward acceleration.
-	linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE
-	angular_damp   = 3.5
-	mass           = self.mass
-	can_sleep      = false
+	gravity_scale = 1.0
+	linear_damp = 0.0
+	linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE    # all drag is ours
+	angular_damp = 0.0
+	angular_damp_mode = RigidBody3D.DAMP_MODE_REPLACE   # rate control does the damping
+	can_sleep = false
 	health = max_health
 	_spawn_transform = global_transform
 	add_to_group("Aircraft")
 
 func _process(delta: float) -> void:
-	_read_collective_input(delta)
+	_on_ground = is_landed()
+	_read_input(delta)
 	_update_rotor_rpm(delta)
 	if is_destroyed and respawn_delay > 0.0:
 		respawn_time_left = maxf(respawn_time_left - delta, 0.0)
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	_check_impact()
-	if engine_on and not is_destroyed:
-		_apply_collective(delta)
-		_apply_cyclic(delta)
-		_apply_antitorque(delta)
-		_apply_hover_stability(delta)
-	_apply_drag(delta)
 
 # ─── Input ────────────────────────────────────────────────────────────────────
 
@@ -153,133 +161,105 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("EngineToggle") and not event.is_echo() and not is_destroyed:
 		engine_on = !engine_on
 
-func _read_collective_input(delta: float) -> void:
-	if not engine_on:
-		_collective_target  = move_toward(_collective_target,  0.0, collective_decay_rate * delta)
-		_collective_current = move_toward(_collective_current, 0.0, collective_spool_speed * delta)
-		return
+func _read_input(delta: float) -> void:
+	var flying := engine_on and not is_destroyed
+	_input_pitch = (Input.get_action_strength("RollForward") - Input.get_action_strength("RollBack")) if flying else 0.0
+	_input_roll  = (Input.get_action_strength("RollRight") - Input.get_action_strength("RollLeft")) if flying else 0.0
+	_input_yaw   = (Input.get_action_strength("YawLeft") - Input.get_action_strength("YawRight")) if flying else 0.0
 
-	if Input.is_action_pressed("Collective+"):
-		_collective_target = move_toward(_collective_target, 1.0, collective_spool_speed * delta)
+	if not flying:
+		_collective_target = 0.0
+	elif Input.is_action_pressed("Collective+"):
+		_collective_target = move_toward(_collective_target, 1.0, collective_rate * delta)
 	elif Input.is_action_pressed("Collective-"):
-		_collective_target = move_toward(_collective_target, 0.0, collective_spool_speed * delta)
+		_collective_target = move_toward(_collective_target, 0.0, collective_rate * delta)
 	else:
-		_collective_target = move_toward(_collective_target, collective_idle, collective_decay_rate * delta)
-
-	_collective_current = move_toward(_collective_current, _collective_target, collective_spool_speed * delta)
+		# Hands off: hover power in the air, ground idle when sitting on the ground
+		var rest := 0.0 if _on_ground else 0.5
+		_collective_target = move_toward(_collective_target, rest, collective_return_rate * delta)
+	_collective_current = move_toward(_collective_current, _collective_target, 3.0 * delta)
 
 # ─── RPM ─────────────────────────────────────────────────────────────────────
 
 func _update_rotor_rpm(delta: float) -> void:
-	if engine_on:
-		var target_rpm : float = lerpf(rotor_rpm_idle, rotor_rpm_max, _collective_current)
-		var spool_rate : float = rotor_spool_up_rate if target_rpm > rotor_rpm_current \
-							   else rotor_spool_down_rate
-		rotor_rpm_current = move_toward(rotor_rpm_current, target_rpm, spool_rate * delta)
-	else:
-		rotor_rpm_current = move_toward(rotor_rpm_current, 0.0, rotor_spool_down_rate * delta)
+	var target_rpm := rotor_rpm_max if (engine_on and not is_destroyed) else 0.0
+	var rate := rotor_spool_up_rate if target_rpm > rotor_rpm_current else rotor_spool_down_rate
+	rotor_rpm_current = move_toward(rotor_rpm_current, target_rpm, rate * delta)
 
-# ─── Forces ──────────────────────────────────────────────────────────────────
+## 0..1: how much of the rotor's power is available (thrust goes with rpm²)
+func rotor_fraction() -> float:
+	return clampf(rotor_rpm_current / rotor_rpm_max, 0.0, 1.0)
 
-func _apply_collective(_delta: float) -> void:
-	if _collective_current <= 0.01:
-		return
+# ─── Flight model ────────────────────────────────────────────────────────────
 
-	var weight_force : float   = mass * 9.8
-	var up_direction : Vector3 = global_transform.basis.y
-	var lift_force   : float   = _collective_current * collective_max_force * weight_force
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	var b := state.transform.basis.orthonormalized()
+	var g := state.total_gravity.length()
+	var weight := mass * g
+	var vel := state.linear_velocity
+	var v_body := b.inverse() * vel          # x = side, y = up, z = forward (nose is +Z)
+	var speed := vel.length()
+	var rotor := rotor_fraction()
 
-	# Tilt compensation: lift / cos(tilt), blended by tilt_lift_compensation,
-	# only for normal flying attitudes (fades out between full and zero deg)
-	var tilt_cos : float = clampf(up_direction.dot(Vector3.UP), 0.5, 1.0)
-	var comp := tilt_lift_compensation * (1.0 - smoothstep(tilt_compensation_full_deg, tilt_compensation_zero_deg, _tilt_deg()))
-	lift_force *= lerpf(1.0, 1.0 / tilt_cos, comp)
+	# --- Rotor thrust: the only thing holding us up
+	var thrust_g := _collective_to_thrust(_collective_current)
+	var horizontal_speed := Vector2(vel.x, vel.z).length()
+	thrust_g *= 1.0 + translational_lift_bonus * smoothstep(translational_lift_speeds.x, translational_lift_speeds.y, horizontal_speed)
+	# Climbing eats thrust, descending adds it (world vertical speed only, so
+	# level forward flight isn't affected)
+	thrust_g -= vel.y * heave_damping
+	# Flare: air coming UP through the disc (moving opposite to the rotor's up axis)
+	var inflow_up := -vel.dot(b.y)
+	if inflow_up > 0.0:
+		thrust_g += minf(inflow_up * flare_lift_gain, flare_lift_max_g)
+	thrust_g *= 1.0 + ground_effect_lift_bonus * _ground_effect(state)
+	thrust_g = maxf(thrust_g, 0.0) * rotor * rotor
+	state.apply_central_force(b.y * thrust_g * weight)
 
-	# Translational lift. The nose points +Z on this aircraft (verified in
-	# flight), so forward speed is +local Z. Was -Z, which only gave the
-	# bonus when flying backwards.
-	var local_velocity : Vector3 = global_basis.inverse() * linear_velocity
-	var forward_speed  : float   = max(local_velocity.z, 0.0)
-	var etl_fraction   : float   = clampf(forward_speed / 12.0, 0.0, 1.0) * translational_lift_bonus
-	lift_force += lift_force * etl_fraction
+	# --- Fuselage drag, per body axis, quadratic (+ a touch of linear)
+	var areas := Vector3(area_side, area_vertical, area_front)
+	var drag_body := -Vector3(
+		v_body.x * absf(v_body.x) * areas.x,
+		v_body.y * absf(v_body.y) * areas.y,
+		v_body.z * absf(v_body.z) * areas.z) * drag_coefficient
+	drag_body -= v_body * low_speed_drag
+	state.apply_central_force(b * drag_body * mass)
 
-	var space_state := get_world_3d().direct_space_state
-	var ray_params  := PhysicsRayQueryParameters3D.create(
-			global_position,
-			global_position + Vector3.DOWN * ground_effect_max_height)
-	ray_params.exclude = [get_rid()]   # exclude wants RIDs, not nodes
-	var ground_hit  := space_state.intersect_ray(ray_params)
-	if ground_hit:
-		var height_fraction : float = 1.0 - (global_position.distance_to(ground_hit.position) / ground_effect_max_height)
-		lift_force += lift_force * ground_effect_lift_bonus * height_fraction
+	# --- Attitude: cyclic / pedals command rotation rates
+	if rotor > 0.05 and not is_destroyed:
+		var desired := Vector3(
+			_input_pitch * deg_to_rad(pitch_rate_deg),
+			_input_yaw   * deg_to_rad(yaw_rate_deg),
+			_input_roll  * deg_to_rad(roll_rate_deg))
+		# Weathervane: with no pedal held, the tail swings the nose into the
+		# airflow (sideslip angle, scaled in by speed)
+		if horizontal_speed > 3.0:
+			var sideslip := atan2(v_body.x, maxf(absf(v_body.z), 0.1) * signf(v_body.z + 0.001))
+			var strength := weathervane_strength * smoothstep(3.0, weathervane_full_speed, horizontal_speed)
+			desired.y += sideslip * strength * (1.0 - absf(_input_yaw))
+		var av_body := b.inverse() * state.angular_velocity
+		var k := 1.0 - exp(-control_response * rotor * state.step)
+		av_body = av_body.lerp(desired, k)
+		state.angular_velocity = b * av_body
 
-	apply_central_force(up_direction * lift_force)
+func _collective_to_thrust(c: float) -> float:
+	# 0 -> min, 0.5 -> exactly hover (1 g), 1 -> max
+	if c < 0.5:
+		return lerpf(min_thrust_g, 1.0, c * 2.0)
+	return lerpf(1.0, max_thrust_g, (c - 0.5) * 2.0)
 
-func _apply_drag(_delta: float) -> void:
-	# Decompose world velocity along the flat heading (yaw only): X = sideways,
-	# Y = true vertical, Z = forward along the ground track
-	var heading  : Basis   = Basis(Vector3.UP, global_rotation.y)
-	var velocity : Vector3 = heading.inverse() * linear_velocity
-
-	# Belly into the wind: way past a normal attitude, forward drag shoots up
-	var belly := 1.0 + belly_drag_multiplier * smoothstep(belly_drag_start_deg, 80.0, _tilt_deg())
-	var forward_drag := -velocity.z * drag_forward - velocity.z * absf(velocity.z) * drag_forward_quadratic * belly
-
-	# Past VNE: steep extra drag that pins top speed (any direction)
-	var vne := vne_kmh / 3.6
-	var speed := linear_velocity.length()
-	var vne_force := Vector3.ZERO
-	if speed > vne:
-		var over := speed - vne
-		vne_force = -linear_velocity.normalized() * over * over * vne_drag * mass
-
-	var drag_force : Vector3 = Vector3(
-		-velocity.x * drag_sideways,
-		-velocity.y * drag_vertical,
-		forward_drag
-	) * mass
-
-	apply_central_force(heading * drag_force + vne_force)
+func _ground_effect(state: PhysicsDirectBodyState3D) -> float:
+	var from := state.transform.origin
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * ground_effect_max_height)
+	query.exclude = [get_rid()]
+	var hit := state.get_space_state().intersect_ray(query)
+	if hit.is_empty():
+		return 0.0
+	return 1.0 - from.distance_to(hit.position) / ground_effect_max_height
 
 ## How far the rotor disc is tipped from level, in degrees
-func _tilt_deg() -> float:
+func tilt_deg() -> float:
 	return rad_to_deg(acos(clampf(global_basis.y.dot(Vector3.UP), -1.0, 1.0)))
-
-func _apply_cyclic(_delta: float) -> void:
-	var pitch_input  : float   = Input.get_action_strength("RollForward") \
-							   - Input.get_action_strength("RollBack")
-	var roll_input   : float   = Input.get_action_strength("RollRight")   \
-							   - Input.get_action_strength("RollLeft")
-	var right_axis   : Vector3 = global_transform.basis.x
-	var forward_axis : Vector3 = -global_transform.basis.z
-	var weight_force : float   = mass * 9.8
-
-	apply_torque(right_axis   *  pitch_input * cyclic_pitch_strength * weight_force)
-	apply_torque(forward_axis * -roll_input  * cyclic_roll_strength  * weight_force)
-
-	var angular_vel : Vector3 = angular_velocity
-	apply_torque(-right_axis   * angular_vel.dot(right_axis)   * cyclic_angular_damping * weight_force)
-	apply_torque(-forward_axis * angular_vel.dot(forward_axis) * cyclic_angular_damping * weight_force)
-
-func _apply_antitorque(_delta: float) -> void:
-	var pedal_input  : float   = Input.get_action_strength("YawLeft")  \
-							   - Input.get_action_strength("YawRight")
-	var up_axis      : Vector3 = global_transform.basis.y
-	var weight_force : float   = mass * 9.8
-
-	apply_torque(up_axis *  pedal_input         * antitorque_strength        * weight_force)
-	apply_torque(up_axis * -_collective_current * antitorque_auto_correction * weight_force)
-
-func _apply_hover_stability(_delta: float) -> void:
-	if _collective_current < 0.05:
-		return
-	var weight_force : float   = mass * 9.8
-	var current_up   : Vector3 = global_transform.basis.y
-	var level_up     : Vector3 = Vector3.UP
-	var correction   : Vector3 = current_up.cross(level_up)
-	apply_torque(correction * hover_stability_strength * _collective_current * weight_force)
-
-
 
 # ─── Damage ──────────────────────────────────────────────────────────────────
 
@@ -368,9 +348,10 @@ func is_landed() -> bool:
 func get_debug_info() -> Dictionary:
 	return {
 		"engine_on"          : engine_on,
-		"collective_current" : snappedf(_collective_current, 0.01),
-		"collective_target"  : snappedf(_collective_target,  0.01),
+		"collective"         : snappedf(_collective_current, 0.01),
+		"thrust_g"           : snappedf(_collective_to_thrust(_collective_current) * rotor_fraction() * rotor_fraction(), 0.01),
 		"rotor_rpm"          : snappedf(rotor_rpm_current, 1.0),
+		"tilt_deg"           : snappedf(tilt_deg(), 1.0),
 		"linear_speed"       : linear_velocity.length(),
 		"forward_speed_kmh"  : snappedf((global_basis.inverse() * linear_velocity).z * 3.6, 1.0),
 		"altitude"           : global_position.y,
