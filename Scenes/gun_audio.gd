@@ -49,9 +49,11 @@ func _on_fired() -> void:
 	if _active and _active.playing:
 		return
 	# First round of a burst: the fire loop takes over from the windup
-	if fire_loops.is_empty():
+	# Skip players with no sound assigned (e.g. a missing file)
+	var loops := fire_loops.filter(func(p): return p != null and p.stream != null)
+	if loops.is_empty():
 		return
-	_active = fire_loops.pick_random()
+	_active = loops.pick_random()
 	_active.pitch_scale = 1.0 + randf_range(-pitch_variation, pitch_variation)
 	_active.play()
 	if shutdown:
