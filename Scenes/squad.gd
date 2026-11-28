@@ -54,6 +54,17 @@ enum Orders {NONE, HOLD, MOVE, CAPTURE}
 ## Gap between troops in the capture ring (metres)
 @export var formation_spacing : float = 2.0
 
+@export_group("Vehicle hunting")
+## Anti-tank team: once dropped off, stays around where it landed (its home)
+## and goes after any enemy vehicle within hunt_radius of it. Ignores
+## objectives.
+@export var hunt_vehicles : bool = false
+@export var hunt_radius : float = 400.0
+## Closes to about this distance (m) from a vehicle, then lets rockets fly
+@export var hunt_standoff : float = 140.0
+## Seconds between looking for prey
+@export var hunt_interval : float = 2.0
+
 @export_group("Combat")
 ## Seconds with nobody engaged before the squad resumes its order
 @export var contact_clear_delay : float = 3.0
@@ -75,12 +86,23 @@ var target_obj : Objective = null
 var _travelling : bool = false
 var _formation_timer : float = 0.0
 
+## Hunting: where the team was deployed, and what it's after
+var hunt_home : Vector3
+var has_hunt_home : bool = false
+var hunt_target : Vehicle = null
+var _hunt_timer : float = 0.0
+
 func _ready() -> void:
 	for child in get_children():
 		if child is Troop:
 			add_member(child)
 
 func _physics_process(delta: float) -> void:
+	if hunt_vehicles and has_hunt_home:
+		_hunt_timer -= delta
+		if _hunt_timer <= 0.0:
+			_hunt_timer = hunt_interval
+			_update_hunt()
 	if in_contact:
 		_update_contact(delta)
 		return   # formation movement is paused while fighting
@@ -185,6 +207,58 @@ func order_hold() -> void:
 	for t in available_members():
 		t.speed_scale = 1.0
 		t.stop()
+
+## Anti-tank teams: guard the area around `home` and hunt vehicles in it
+func order_hunt(home: Vector3) -> void:
+	hunt_vehicles = true
+	auto_advance = false
+	hunt_home = home
+	has_hunt_home = true
+	_hunt_timer = 0.0
+	order_move(home)
+
+## A member that went off on its own (planting a charge) wants back in
+func member_rejoin(troop: Troop) -> void:
+	if not troop.is_available() or _travelling:
+		return   # the formation update picks him up on its own
+	match order:
+		Orders.MOVE, Orders.CAPTURE:
+			var offset := Vector3(randf_range(-4.0, 4.0), 0.0, randf_range(-4.0, 4.0))
+			troop.move_to(order_position + offset)
+
+func _update_hunt() -> void:
+	var units := alive_members()
+	if units.is_empty():
+		return
+	var here := centroid()
+	# Keep the current prey while it lives and stays in our patch
+	if not _is_prey(hunt_target):
+		hunt_target = null
+		var best_d := INF
+		for node in get_tree().get_nodes_in_group("Vehicles"):
+			if _is_prey(node):
+				var d := here.distance_to(node.global_position)
+				if d < best_d:
+					best_d = d
+					hunt_target = node
+	if hunt_target:
+		var to_us := here - hunt_target.global_position
+		to_us.y = 0.0
+		if to_us.length() > hunt_standoff:
+			var spot := hunt_target.global_position + to_us.normalized() * hunt_standoff * 0.8
+			if order != Orders.MOVE or order_position.distance_to(spot) > 25.0 or not _travelling:
+				order_move(spot)
+	elif _flat(here - hunt_home).length() > 30.0 and not (order == Orders.MOVE and _travelling):
+		order_move(hunt_home)   # nothing to hunt: go back home
+
+## Untyped: may be a freed vehicle
+func _is_prey(v) -> bool:
+	return is_instance_valid(v) and v is Vehicle and v.is_alive() and not v.is_carried() \
+		and v.team != team and v.team != 0 \
+		and _flat(v.global_position - hunt_home).length() <= hunt_radius
+
+func _flat(v: Vector3) -> Vector3:
+	return Vector3(v.x, 0.0, v.z)
 
 func advance_to_nearest_objective() -> void:
 	var obj := Objective.nearest_not_owned_by(get_tree(), centroid(), team)
@@ -332,12 +406,18 @@ func _resume_order() -> void:
 # ---------------------------------------------------------------- member events
 
 func _on_member_disembarked(_troop: Troop) -> void:
-	if not auto_advance:
+	if not auto_advance and not hunt_vehicles:
 		return
 	# Wait until the whole squad is clear of the aircraft before moving off
 	for t in alive_members():
 		if t.state == Troop.States.PASSENGER or t.state == Troop.States.MOVING_TO_EXIT:
 			return
+	if hunt_vehicles:
+		# Where we were dropped off is the patch we guard
+		if not has_hunt_home:
+			print("[Squad %s] deployed, hunting vehicles within %dm" % [squad_name, roundi(hunt_radius)])
+			order_hunt(centroid())
+		return
 	advance_to_nearest_objective()
 
 func _on_member_arrived(_troop: Troop) -> void:

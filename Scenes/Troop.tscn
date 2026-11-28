@@ -12,10 +12,20 @@ albedo_color = Color(0, 0, 1, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_mb0wo"]
 
-[node name="Troop" type="CharacterBody3D" unique_id=84826896 node_paths=PackedStringArray("tint_mesh")]
+[sub_resource type="CylinderMesh" id="CylinderMesh_launcher"]
+top_radius = 0.07
+bottom_radius = 0.07
+height = 1.1
+radial_segments = 10
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_launcher"]
+albedo_color = Color(0.22, 0.27, 0.18, 1)
+
+[node name="Troop" type="CharacterBody3D" unique_id=84826896 node_paths=PackedStringArray("tint_mesh", "launcher_mesh")]
 script = ExtResource("1_mb0wo")
 tint_mesh = NodePath("FaceMesh")
 sight_range = 150.0
+launcher_mesh = NodePath("Launcher")
 
 [node name="FaceMesh" type="MeshInstance3D" parent="." unique_id=1290880233]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.62394285, -0.41008693)
@@ -27,6 +37,12 @@ shape = SubResource("CapsuleShape3D_q5w1q")
 
 [node name="CapsuleMesh" type="MeshInstance3D" parent="." unique_id=1620613639]
 mesh = SubResource("CapsuleMesh_mb0wo")
+
+[node name="Launcher" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0.38, 0.75, -0.05)
+visible = false
+mesh = SubResource("CylinderMesh_launcher")
+surface_material_override/0 = SubResource("StandardMaterial3D_launcher")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1173669933]
 path_height_offset = -0.5

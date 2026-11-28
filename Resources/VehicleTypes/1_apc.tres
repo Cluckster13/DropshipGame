@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="VehicleType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_type.gd" id="1_vt"]
+[ext_resource type="PackedScene" path="res://Scenes/Vehicles/APC.tscn" id="2_scene"]
+[ext_resource type="Resource" path="res://Resources/SquadTypes/2_rifle_squad.tres" id="3_crew"]
+
+[resource]
+script = ExtResource("1_vt")
+display_name = "APC"
+tier = 1
+description = "Drives a rifle squad from base to the nearest objective, drops it off, then backs it up with its machine gun. Shrugs off rifles; rockets kill it."
+cost = 550
+tickets = 8
+scene = ExtResource("2_scene")
+crew_squad = ExtResource("3_crew")
+stats = "Armour: light   ·   MG vs troops & aircraft"

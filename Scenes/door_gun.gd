@@ -226,9 +226,10 @@ func _fire(spread_deg: float) -> void:
 	var hit_pos := end
 	if not hit.is_empty():
 		hit_pos = hit.position
-		if hit.collider is Troop:
-			# Credit the aircraft, so whoever survives knows to shoot back at it
-			hit.collider.take_damage(damage, aircraft if aircraft else self)
+		if hit.collider is Troop or hit.collider is Vehicle:
+			# Credit the aircraft, so whoever survives knows to shoot back at it.
+			# Vehicles shrug most of it off (their bullet armour).
+			Damage.apply(hit.collider, damage, aircraft if aircraft else self, Damage.Type.BULLET)
 	Tracer.spawn(get_tree().current_scene, from, hit_pos, Color(1.0, 0.85, 0.3))
 
 func _raycast(from: Vector3, to: Vector3) -> Dictionary:

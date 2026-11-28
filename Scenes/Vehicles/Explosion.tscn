@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/explosion.gd" id="1_exp"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_exp"]
+radius = 1.0
+height = 2.0
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="Mat_exp"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.55, 0.15, 1)
+
+[node name="Explosion" type="Node3D" node_paths=PackedStringArray("light", "mesh")]
+script = ExtResource("1_exp")
+light = NodePath("Light")
+mesh = NodePath("Fireball")
+
+[node name="Fireball" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_exp")
+surface_material_override/0 = SubResource("Mat_exp")
+
+[node name="Light" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.6, 0.25, 1)
+light_energy = 4.0
+omni_range = 12.0

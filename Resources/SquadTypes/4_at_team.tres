@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SquadType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/squad_type.gd" id="1_st"]
+
+[resource]
+script = ExtResource("1_st")
+display_name = "Anti-Tank Team"
+tier = 2
+description = "Two troops with rocket launchers. Drop them off and they hunt enemy vehicles in a wide area around the landing zone. They won't take objectives."
+cost = 300
+size = 2
+skill = 1.1
+max_health = 100.0
+move_speed = 4.0
+anti_tank = true
+hunt_vehicles = true
+hunt_radius = 400.0

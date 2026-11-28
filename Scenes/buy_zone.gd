@@ -9,6 +9,17 @@ extends Area3D
 
 @export var squad_types : Array[SquadType] = []
 @export_dir var squad_types_dir : String = "res://Resources/SquadTypes"
+## Vehicles for sale. Empty = everything in vehicle_types_dir.
+@export var vehicle_types : Array[VehicleType] = []
+@export_dir var vehicle_types_dir : String = "res://Resources/VehicleTypes"
+## Where bought ground vehicles appear and drive off from. Empty = in front
+## of the aircraft.
+@export var vehicle_spawn_point : Node3D
+## Where bought sling loads (AA emplacements) appear. Empty = behind the
+## aircraft, ready to hook.
+@export var sling_spawn_point : Node3D
+## Where vehicle nodes are added. Empty = the current scene root.
+@export var vehicle_parent : Node
 @export var troop_scene : PackedScene = preload("res://Scenes/Troop.tscn")
 ## The requisition screen and the on-screen "B - Requisition troops" prompt
 ## (both are scenes, edit their layout there)
@@ -38,13 +49,21 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 	if squad_types.is_empty():
-		_load_types_from_dir()
-	squad_types.sort_custom(func(a, b): return a.tier < b.tier or (a.tier == b.tier and a.cost < b.cost))
+		for r in _load_dir(squad_types_dir):
+			if r is SquadType:
+				squad_types.append(r)
+	if vehicle_types.is_empty():
+		for r in _load_dir(vehicle_types_dir):
+			if r is VehicleType:
+				vehicle_types.append(r)
+	var by_tier_then_cost := func(a, b): return a.tier < b.tier or (a.tier == b.tier and a.cost < b.cost)
+	squad_types.sort_custom(by_tier_then_cost)
+	vehicle_types.sort_custom(by_tier_then_cost)
 
 	_menu = menu_scene.instantiate() as BuyMenu
 	_menu.visible = false
 	add_child(_menu)
-	_menu.set_squad_types(squad_types)
+	_menu.set_items(squad_types, vehicle_types)
 	_menu.purchase_requested.connect(_buy)
 	_menu.close_requested.connect(close_menu)
 
@@ -92,7 +111,13 @@ func _refresh_menu() -> void:
 
 # ---------------------------------------------------------------- buying
 
-func _buy(t: SquadType) -> void:
+func _buy(item: Resource) -> void:
+	if item is VehicleType:
+		_buy_vehicle(item)
+	elif item is SquadType:
+		_buy_squad(item)
+
+func _buy_squad(t: SquadType) -> void:
 	var ph := _passengers()
 	var economy := _economy()
 	if ph == null or economy == null or not _can_shop():
@@ -103,22 +128,15 @@ func _buy(t: SquadType) -> void:
 		return
 
 	_bought_count += 1
-	var squad := Squad.new()
-	squad.name = "%s_%d" % [t.display_name.replace(" ", ""), _bought_count]
-	squad.squad_name = "%s %d" % [t.display_name, _bought_count]
-	squad.team = Troop.TEAM_FRIENDLY
-	squad.skill = t.skill
-	squad.auto_advance = true
+	var squad := t.make_squad(troop_scene, Troop.TEAM_FRIENDLY,
+		"%s_%d" % [t.display_name.replace(" ", ""), _bought_count], "%s %d" % [t.display_name, _bought_count])
 
 	var origin := _spawn_origin()
 	var facing := _spawn_facing(origin)
-	for i in t.size:
-		var troop := troop_scene.instantiate() as Troop
-		troop.name = "%s_%d" % [squad.name, i + 1]
-		troop.max_health = t.max_health
-		troop.move_speed = t.move_speed
-		troop.position = _ground_point(origin + facing * _grid_offset(i))
-		squad.add_child(troop)   # squad picks these up as members in its _ready
+	var i := 0
+	for troop in squad.get_children():
+		(troop as Troop).position = _ground_point(origin + facing * _grid_offset(i))
+		i += 1
 
 	(squad_parent if squad_parent else get_tree().current_scene).add_child(squad)
 	print("[BuyZone] Bought %s for $%d (funds %d)" % [squad.squad_name, t.cost, economy.funds])
@@ -131,6 +149,39 @@ func _buy(t: SquadType) -> void:
 		if seat == "" or not ph.reserve_seat(seat, troop):
 			break
 		troop.command_board(ph, seat, door)
+	_refresh_menu()
+
+## Vehicles appear at base: ground vehicles in front of the aircraft (or at
+## vehicle_spawn_point) and drive off on their own; sling loads behind it,
+## packed, for the helicopter to hook and fly out.
+func _buy_vehicle(t: VehicleType) -> void:
+	var economy := _economy()
+	if economy == null or not _can_shop() or t.scene == null:
+		return
+	if not economy.spend(t.cost):
+		return
+	_bought_count += 1
+	var marker := sling_spawn_point if t.sling_loaded else vehicle_spawn_point
+	var pos: Vector3
+	var facing := _aircraft.global_basis.z   # aircraft nose is +Z
+	facing.y = 0.0
+	if marker:
+		pos = marker.global_position
+		facing = -marker.global_basis.z
+	elif t.sling_loaded:
+		pos = _aircraft.global_position - facing.normalized() * 22.0
+	else:
+		pos = _aircraft.global_position + facing.normalized() * 35.0
+	# A few metres of scatter so repeat purchases don't stack up
+	pos += Vector3(randf_range(-5, 5), 0.0, randf_range(-5, 5))
+	pos = _ground_point(pos) - Vector3.UP * 0.8
+	var parent := vehicle_parent if vehicle_parent else get_tree().current_scene
+	var v := t.spawn(parent, Troop.TEAM_FRIENDLY, pos, facing,
+		"%s_%d" % [t.display_name.replace(" ", ""), _bought_count], troop_scene,
+		squad_parent if squad_parent else get_tree().current_scene)
+	if v and t.sling_loaded:
+		v.pack()
+	print("[BuyZone] Bought %s for $%d (funds %d)" % [t.display_name, t.cost, economy.funds])
 	_refresh_menu()
 
 ## 3 abreast, rows going back from the aircraft
@@ -205,18 +256,21 @@ func _on_body_exited(body: Node3D) -> void:
 		_aircraft = null
 		close_menu()
 
-func _load_types_from_dir() -> void:
-	var dir := DirAccess.open(squad_types_dir)
+## Every resource in a folder (SquadTypes, VehicleTypes)
+func _load_dir(path: String) -> Array[Resource]:
+	var out: Array[Resource] = []
+	var dir := DirAccess.open(path)
 	if dir == null:
-		push_warning("BuyZone: can't open %s" % squad_types_dir)
-		return
+		push_warning("BuyZone: can't open %s" % path)
+		return out
 	for file in dir.get_files():
 		# Exported builds rename resources to *.tres.remap
-		var path := squad_types_dir.path_join(file.trim_suffix(".remap"))
-		if path.ends_with(".tres") or path.ends_with(".res"):
-			var t := load(path) as SquadType
-			if t:
-				squad_types.append(t)
+		var res_path := path.path_join(file.trim_suffix(".remap"))
+		if res_path.ends_with(".tres") or res_path.ends_with(".res"):
+			var r := load(res_path)
+			if r:
+				out.append(r)
+	return out
 
 # ---------------------------------------------------------------- prompt
 

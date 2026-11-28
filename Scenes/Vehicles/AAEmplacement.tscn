@@ -1,0 +1,119 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle.gd" id="1_veh"]
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_weapon.gd" id="2_wpn"]
+
+[sub_resource type="BoxShape3D" id="Shape_base"]
+size = Vector3(3, 1.8, 3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_tint"]
+albedo_color = Color(0.3, 0.38, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_sand"]
+albedo_color = Color(0.55, 0.5, 0.38, 1)
+
+[sub_resource type="CylinderMesh" id="Mesh_sandbags"]
+top_radius = 1.6
+bottom_radius = 1.8
+height = 0.9
+radial_segments = 12
+
+[sub_resource type="BoxMesh" id="Mesh_mount"]
+size = Vector3(1.3, 0.8, 1.3)
+
+[sub_resource type="CylinderMesh" id="Mesh_barrel"]
+top_radius = 0.05
+bottom_radius = 0.07
+height = 2.2
+radial_segments = 8
+
+[sub_resource type="TorusMesh" id="Mesh_hook"]
+inner_radius = 0.15
+outer_radius = 0.25
+
+[node name="AAEmplacement" type="CharacterBody3D" node_paths=PackedStringArray("tint_meshes", "sling_point", "hide_when_destroyed")]
+script = ExtResource("1_veh")
+display_name = "AA Emplacement"
+tint_meshes = [NodePath("Model/Mount")]
+max_health = 120.0
+bullet_armour = 0.03
+at_armour = 1.0
+charge_armour = 1.0
+flak_armour = 0.3
+chargeable = true
+aim_height = 1.2
+hull_radius = 2.0
+role = 2
+sling_loadable = true
+sling_point = NodePath("SlingPoint")
+sling_weight_fraction = 0.3
+hide_when_destroyed = [NodePath("Turret/Guns")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_base")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Sandbags" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("Mesh_sandbags")
+surface_material_override/0 = SubResource("Mat_sand")
+
+[node name="Mount" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("Mesh_mount")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="Turret" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Guns" type="Node3D" parent="Turret"]
+
+[node name="BarrelL" type="MeshInstance3D" parent="Turret/Guns"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.25, 0, -1)
+mesh = SubResource("Mesh_barrel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="BarrelR" type="MeshInstance3D" parent="Turret/Guns"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0.25, 0, -1)
+mesh = SubResource("Mesh_barrel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="AAGun" type="Node3D" parent="Turret/Guns" node_paths=PackedStringArray("turret", "barrel", "muzzle")]
+script = ExtResource("2_wpn")
+targets_troops = false
+targets_aircraft = true
+max_range = 400.0
+scan_interval = 0.4
+reaction_time = 1.2
+turret = NodePath("../..")
+barrel = NodePath("..")
+muzzle = NodePath("Muzzle")
+turret_speed_deg = 80.0
+barrel_speed_deg = 60.0
+barrel_min_deg = -5.0
+barrel_max_deg = 85.0
+fire_cone_deg = 6.0
+damage = 12.0
+damage_type = 3
+fire_rate = 10.0
+burst_time = 1.5
+burst_pause = 1.1
+spread_deg = 0.7
+spread_per_100m_deg = 0.5
+tracer_color = Color(1, 0.45, 0.3, 1)
+
+[node name="Muzzle" type="Marker3D" parent="Turret/Guns/AAGun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.2)
+
+[node name="SlingPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+
+[node name="HookRing" type="MeshInstance3D" parent="SlingPoint"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("Mesh_hook")
+surface_material_override/0 = SubResource("Mat_dark")

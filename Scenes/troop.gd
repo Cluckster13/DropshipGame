@@ -20,7 +20,7 @@ signal died(troop: Troop)
 signal contact(troop: Troop, enemy: Node3D)  ## just started fighting (a Troop or an aircraft)
 signal combat_ended(troop: Troop)            ## no more targets, back to previous task
 
-enum States {IDLE, MOVING, MOVING_TO_BOARD, PASSENGER, MOVING_TO_EXIT, COMBAT, DEAD}
+enum States {IDLE, MOVING, MOVING_TO_BOARD, PASSENGER, MOVING_TO_EXIT, COMBAT, DEAD, SAPPING}
 
 const TEAM_FRIENDLY := 1
 const TEAM_ENEMY    := -1
@@ -85,6 +85,30 @@ const TEAM_ENEMY    := -1
 ## sidesteps to find a clear lane instead
 @export var friendly_clearance : float = 1.2
 
+@export_group("Anti-tank")
+## Carries a rocket launcher: goes after vehicles first, fires rockets at
+## them (rifle for everything else)
+@export var anti_tank : bool = false:
+	set(value):
+		anti_tank = value
+		if is_node_ready() and launcher_mesh:
+			launcher_mesh.visible = value
+## Shown only on anti-tank troops (the launcher on the shoulder)
+@export var launcher_mesh : Node3D
+@export var rocket_scene : PackedScene = preload("res://Scenes/Vehicles/Rocket.tscn")
+@export var rocket_range : float = 220.0
+## Seconds to reload between rockets
+@export var rocket_reload : float = 6.0
+@export var rocket_spread_deg : float = 0.8
+
+@export_group("Demolition")
+## Walks up to enemy vehicles marked chargeable (AA) and blows them up
+@export var can_plant_charges : bool = true
+## Goes for a chargeable vehicle this close (m)
+@export var charge_seek_range : float = 50.0
+@export var charge_plant_time : float = 3.0
+@export var charge_damage : float = 1000.0
+
 
 ## Multiplier on move_speed. Squads use this to pace the leader and let
 ## followers speed up / ease off to hold formation.
@@ -119,6 +143,12 @@ var _fire_cooldown    : float = 0.0
 var _reaction_left    : float = 0.0
 var _target_visible   : bool  = false
 var _lost_sight_time  : float = 0.0
+var _rocket_cooldown  : float = 0.0
+var _last_floor_position : Vector3 = Vector3.INF
+
+# Demolition
+var _charge_target : Vehicle = null
+var _plant_left    : float = -1.0   # < 0 = still walking up to it
 
 @onready var nav: NavigationAgent3D = $NavigationAgent3D
 
@@ -131,6 +161,8 @@ func _ready() -> void:
 	_perception_timer = randf() * perception_interval   # spread scans across frames
 	add_to_group("Troops")
 	_apply_team_tint()
+	if launcher_mesh:
+		launcher_mesh.visible = anti_tank
 
 func _physics_process(delta: float) -> void:
 	if state == States.DEAD:
@@ -141,17 +173,24 @@ func _physics_process(delta: float) -> void:
 
 	# Fell out of the world (spawned off the terrain, pushed through it...)
 	if global_position.y < kill_height:
+		push_warning("Troop %s fell out of the world (last on the ground at %s, state %s)" % [
+			name, _last_floor_position, States.keys()[state]])
 		_die()
 		return
+	if is_on_floor():
+		_last_floor_position = global_position
 
 	_perception_timer -= delta
 	if _perception_timer <= 0.0:
 		_perception_timer = perception_interval
 		_perceive()
 
+	_rocket_cooldown -= delta
 	match state:
 		States.COMBAT:
 			_combat_tick(delta)
+		States.SAPPING:
+			_sap_tick(delta)
 		States.MOVING, States.MOVING_TO_BOARD, States.MOVING_TO_EXIT:
 			_update_navigation_direction()
 		_:
@@ -184,6 +223,8 @@ func is_valid_enemy(t) -> bool:
 		return false
 	if t is Troop and t.state == States.PASSENGER:
 		return false   # inside an aircraft: shoot the aircraft instead
+	if t is Vehicle and (t.is_carried() or not (anti_tank or t.rifle_vulnerable())):
+		return false   # rifles can't hurt a tank: leave it to anti-tank troops
 	return is_enemy_of(t)
 
 func is_alerted() -> bool:
@@ -202,17 +243,26 @@ func can_see(other: Node3D) -> bool:
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.is_empty() or hit.collider == other
 
-## Nearest enemy (troop or aircraft) in range with clear line of sight, or null
+## Nearest enemy (troop, vehicle or aircraft) in range with clear line of
+## sight, or null. Anti-tank troops look further for vehicles and pick them
+## first; riflemen only bother with a vehicle when nothing softer is around.
 func find_visible_enemy() -> Node3D:
 	var candidates: Array = []
 	var scan_range := current_sight_range()
-	var range_sq := scan_range * scan_range
-	var others := get_tree().get_nodes_in_group("Troops") + get_tree().get_nodes_in_group("Aircraft")
+	var others := get_tree().get_nodes_in_group("Troops") + get_tree().get_nodes_in_group("Aircraft") \
+		+ get_tree().get_nodes_in_group("Vehicles")
 	for node in others:
 		if not is_valid_enemy(node):
 			continue
-		var d := eye_position().distance_squared_to(node.eye_position())
-		if d <= range_sq:
+		var d := eye_position().distance_to(node.eye_position())
+		var reach := scan_range
+		if node is Vehicle:
+			if anti_tank:
+				reach = maxf(scan_range, rocket_range)
+				d *= 0.2
+			else:
+				d *= 3.0
+		if eye_position().distance_to(node.eye_position()) <= reach:
 			candidates.append([d, node])
 	candidates.sort_custom(func(a, b): return a[0] < b[0])
 	# Only ray-test the closest few; keeps big battles cheap
@@ -262,6 +312,7 @@ func cancel_board() -> void:
 func command_disembark(door_position: Vector3, rally_position: Vector3) -> void:
 	_leave_seat()
 	speed_scale = 1.0
+	visible = true   # hidden while riding inside a vehicle
 
 	global_position = door_position
 	global_basis = Basis(Vector3.UP, global_rotation.y)   # stand upright, keep facing
@@ -289,6 +340,11 @@ func take_damage(amount: float, source: Node = null) -> void:
 func _perceive() -> void:
 	if not can_fight():
 		return
+	if can_plant_charges and not anti_tank:
+		var charge_target := _find_charge_target()
+		if charge_target:
+			_begin_sapping(charge_target)
+			return
 	if state != States.COMBAT:
 		var enemy := find_visible_enemy()
 		if enemy:
@@ -353,6 +409,11 @@ func _combat_tick(delta: float) -> void:
 		direction = right * away * 0.5
 		return
 
+	if anti_tank and target is Vehicle:
+		if _rocket_cooldown <= 0.0:
+			_fire_rocket(target)
+			_rocket_cooldown = rocket_reload * randf_range(0.9, 1.1)
+		return   # reloading: don't waste rifle rounds on armour
 	_fire_at(target)
 	_fire_cooldown = (1.0 / fire_rate) * randf_range(0.85, 1.15)
 
@@ -407,11 +468,110 @@ func _fire_at(enemy: Node3D) -> void:
 	var hit_pos := end
 	if not hit.is_empty():
 		hit_pos = hit.position
-		if hit.collider.has_method("take_damage"):
-			hit.collider.take_damage(damage, self)
+		# collider can be null: Terrain3D's collision has no node behind it,
+		# and a body can be freed the same frame it's hit
+		var hit_body: Object = hit.get("collider")
+		if is_instance_valid(hit_body) and hit_body.has_method("take_damage"):
+			Damage.apply(hit_body, damage, self, Damage.Type.BULLET)
 
 	var col := Color(0.5, 0.7, 1.0) if team == TEAM_FRIENDLY else Color(1.0, 0.55, 0.3)
 	Tracer.spawn(get_tree().current_scene, muzzle, hit_pos, col)
+
+## AT rocket: a slow, visible projectile, lightly led onto moving vehicles
+func _fire_rocket(vehicle: Vehicle) -> void:
+	var forward := -global_basis.z
+	var muzzle := eye_position() + forward * 0.5 + Vector3.UP * 0.2
+	var aim := vehicle.global_position + Vector3.UP * (vehicle.aim_height * 0.6)
+	var flight_time := muzzle.distance_to(aim) / 90.0
+	aim += vehicle.velocity * flight_time
+	var dir := _apply_spread((aim - muzzle).normalized(), deg_to_rad(rocket_spread_deg) / skill)
+	Projectile.fire(rocket_scene, get_tree().current_scene, muzzle, dir, self, [get_rid()])
+
+# ---------------------------------------------------------------- demolition
+
+## Nearest enemy vehicle we could blow up with a charge that no one else is
+## already going for, or null
+func _find_charge_target() -> Vehicle:
+	var best : Vehicle = null
+	var best_d := charge_seek_range
+	for node in get_tree().get_nodes_in_group("Vehicles"):
+		var v := node as Vehicle
+		if v == null or not v.chargeable or not v.is_alive() or v.is_carried() or not is_enemy_of(v):
+			continue
+		if is_instance_valid(v.sapper) and v.sapper != self and v.sapper.is_alive():
+			continue
+		var d := global_position.distance_to(v.global_position)
+		if d < best_d:
+			best_d = d
+			best = v
+	return best
+
+func _begin_sapping(v: Vehicle) -> void:
+	if state == States.COMBAT:
+		target = null
+		_target_visible = false
+	else:
+		_resume_state = state
+	_charge_target = v
+	v.sapper = self
+	_plant_left = -1.0
+	_stuck_time = 0.0
+	nav.target_position = v.global_position
+	state = States.SAPPING
+	print("[Troop] %s going to plant a charge on %s" % [name, v.name])
+
+func _sap_tick(delta: float) -> void:
+	var v := _charge_target
+	if not is_instance_valid(v) or not v.is_alive() or v.is_carried():
+		_end_sapping()
+		return
+	var reach := v.hull_radius + 1.5
+	if _plant_left < 0.0:
+		if _flat_dist(v.global_position, global_position) <= reach:
+			_plant_left = charge_plant_time   # in position: start planting
+			direction = Vector3.ZERO
+			return
+		# Walk up to it (it may be moving)
+		if nav.target_position.distance_to(v.global_position) > 3.0:
+			nav.target_position = v.global_position
+		var next := nav.get_next_path_position() if _path_reaches_target() else v.global_position
+		var to_next := next - global_position
+		to_next.y = 0.0
+		direction = to_next.normalized() if to_next.length_squared() > 0.01 else Vector3.ZERO
+		if direction != Vector3.ZERO:
+			rotation.y = lerp_angle(rotation.y, atan2(-direction.x, -direction.z), delta * turn_speed)
+		return
+	# Kneeling at the hull, setting the charge
+	direction = Vector3.ZERO
+	if _flat_dist(v.global_position, global_position) > reach + 2.0:
+		_plant_left = -1.0   # it drove off: chase it
+		return
+	_plant_left -= delta
+	if _plant_left <= 0.0:
+		print("[Troop] %s detonated a charge on %s" % [name, v.name])
+		Damage.apply(v, charge_damage, self, Damage.Type.CHARGE)
+		_end_sapping()
+
+func _end_sapping() -> void:
+	if is_instance_valid(_charge_target) and _charge_target.sapper == self:
+		_charge_target.sapper = null
+	_charge_target = null
+	_plant_left = -1.0
+	state = States.IDLE
+	if squad:
+		squad.member_rejoin(self)
+
+# ---------------------------------------------------------------- vehicles
+
+## Ride inside a ground vehicle (APC): hidden, no collision, snapped to the seat
+func board_vehicle(seat: Node3D) -> void:
+	_clear_target_obj()
+	target = null
+	seat_marker = seat
+	state = States.PASSENGER
+	collision_layer = 0
+	collision_mask = 0
+	visible = false
 
 ## Random direction inside a cone of half-angle `angle` around `dir`
 func _apply_spread(dir: Vector3, angle: float) -> Vector3:
@@ -479,6 +639,8 @@ func _snap_to_seat() -> void:
 	velocity = Vector3.ZERO
 
 func _die(killer: Node = null) -> void:
+	if is_instance_valid(_charge_target) and _charge_target.sapper == self:
+		_charge_target.sapper = null
 	_leave_seat()
 	_clear_target_obj()
 	target = null

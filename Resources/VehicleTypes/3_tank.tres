@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="VehicleType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_type.gd" id="1_vt"]
+[ext_resource type="PackedScene" path="res://Scenes/Vehicles/Tank.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_vt")
+display_name = "Tank"
+tier = 3
+description = "Heavy armour. Rolls on the nearest objective and pounds vehicles and infantry with its main gun. Only anti-tank rockets can hurt it."
+cost = 900
+tickets = 15
+scene = ExtResource("2_scene")
+stats = "Armour: heavy (AT only)   ·   Main gun + coax MG"

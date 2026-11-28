@@ -97,6 +97,15 @@ theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
 text = "ENEMY HOLDS ALL OBJECTIVES  —  DEFEAT IN 30s"
 horizontal_alignment = 1
 
+[node name="AAWarning" type="Label" parent="Root/TopCenter"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 26
+text = "⚠  ANTI-AIR FIRE"
+horizontal_alignment = 1
+
 [node name="Banner" type="VBoxContainer" parent="Root" unique_id=577165306]
 unique_name_in_owner = true
 visible = false
@@ -269,4 +278,13 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
 theme_override_font_sizes/font_size = 16
 text = "F  load    U  unload"
+horizontal_alignment = 2
+
+[node name="Sling" type="Label" parent="Root/Troops/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.25, 1)
+theme_override_font_sizes/font_size = 18
+text = "H  hook AA Emplacement"
 horizontal_alignment = 2

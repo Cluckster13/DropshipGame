@@ -42,6 +42,19 @@ signal game_over(player_won: bool)
 ## Spacing between troops when a squad spawns (m)
 @export var spawn_spacing : float = 1.6
 
+@export_group("Vehicles")
+## Vehicles the enemy can send. Empty = every VehicleType in vehicle_types_dir.
+@export var enemy_vehicle_types : Array[VehicleType] = []
+@export_dir var vehicle_types_dir : String = "res://Resources/VehicleTypes"
+## First wave that brings a vehicle, then one every vehicle_wave_every waves
+@export var first_vehicle_wave : int = 2
+@export_range(1, 10, 1) var vehicle_wave_every : int = 2
+@export var max_enemy_vehicles : int = 4
+## Where enemy vehicles are added. Empty = the current scene root.
+@export var vehicle_parent : Node
+## Enemy AA emplacements are set up this far (m) from an objective it holds
+@export var emplacement_distance : Vector2 = Vector2(25.0, 45.0)
+
 @export_group("Rules")
 ## Enemy must hold every objective this long (s) for the player to lose
 @export var hold_to_lose : float = 30.0
@@ -65,7 +78,13 @@ func _ready() -> void:
 	tickets = starting_tickets
 	_wave_timer = first_wave_delay
 	if enemy_squad_types.is_empty():
-		_load_types_from_dir()
+		for r in _load_dir(squad_types_dir):
+			if r is SquadType:
+				enemy_squad_types.append(r)
+	if enemy_vehicle_types.is_empty():
+		for r in _load_dir(vehicle_types_dir):
+			if r is VehicleType:
+				enemy_vehicle_types.append(r)
 	enemy_squad_types.sort_custom(func(a, b): return a.tier < b.tier)
 	var economy := get_node_or_null("/root/Economy")
 	if economy:
@@ -93,11 +112,23 @@ func _unhandled_input(event: InputEvent) -> void:
 func time_to_next_wave() -> float:
 	return _wave_timer if tickets > 0 and not is_over else -1.0
 
+## Enemy troops still alive (vehicles not included)
 func enemies_alive() -> int:
 	var n := 0
 	for node in get_tree().get_nodes_in_group("Troops"):
 		var t := node as Troop
 		if t and t.team == Troop.TEAM_ENEMY and t.is_alive():
+			n += 1
+	return n
+
+func enemy_vehicles_alive() -> int:
+	return _vehicles_alive(Troop.TEAM_ENEMY)
+
+func _vehicles_alive(team: int) -> int:
+	var n := 0
+	for node in get_tree().get_nodes_in_group("Vehicles"):
+		var v := node as Vehicle
+		if v and v.team == team and v.is_alive():
 			n += 1
 	return n
 
@@ -136,50 +167,115 @@ func _spawn_wave() -> void:
 			break
 		_spawn_squad(t, size)
 		spawned += size
+	if wave >= first_vehicle_wave and (wave - first_vehicle_wave) % vehicle_wave_every == 0:
+		if _spawn_vehicle():
+			spawned += 1
 	if spawned > 0:
-		print("[Battle] Wave %d: %d enemy troops (%d tickets left)" % [wave, spawned, tickets])
+		print("[Battle] Wave %d: %d enemy troops/vehicles (%d tickets left)" % [wave, spawned, tickets])
 		wave_spawned.emit(wave)
 
-## Better squads unlock as waves go on
-func _pick_type() -> SquadType:
+func _max_tier() -> int:
 	@warning_ignore("integer_division")
-	var max_tier := 1 + (wave - 1) / waves_per_tier
-	var pool := enemy_squad_types.filter(func(t): return t.tier <= max_tier)
+	return 1 + (wave - 1) / waves_per_tier
+
+## Better squads unlock as waves go on. Anti-tank teams only come out once
+## the player has vehicles to hunt.
+func _pick_type() -> SquadType:
+	var max_tier := _max_tier()
+	var player_has_vehicles := _vehicles_alive(Troop.TEAM_FRIENDLY) > 0
+	var pool := enemy_squad_types.filter(func(t): return t.tier <= max_tier and (player_has_vehicles or not t.hunt_vehicles))
 	if pool.is_empty():
 		pool = [enemy_squad_types[0]]
 	return pool.pick_random()
 
 func _spawn_squad(t: SquadType, size: int) -> void:
 	_squad_count += 1
-	var squad := Squad.new()
-	squad.name = "Enemy%s_%d" % [t.display_name.replace(" ", ""), _squad_count]
-	squad.squad_name = "Enemy %s %d" % [t.display_name, _squad_count]
-	squad.team = Troop.TEAM_ENEMY
-	squad.skill = t.skill
-	squad.auto_advance = true
+	var squad := t.make_squad(troop_scene, Troop.TEAM_ENEMY,
+		"Enemy%s_%d" % [t.display_name.replace(" ", ""), _squad_count], "Enemy %s %d" % [t.display_name, _squad_count])
+	# Short-handed squad (out of tickets / room): drop the extras
+	var troops := squad.get_children()
+	for i in range(size, troops.size()):
+		squad.remove_child(troops[i])
+		troops[i].free()
 
 	var spawn: Node3D = spawn_points.pick_random()
 	var origin := spawn.global_position + Vector3(randf_range(-6, 6), 0, randf_range(-6, 6))
-	for i in size:
-		var troop := troop_scene.instantiate() as Troop
-		troop.name = "%s_%d" % [squad.name, i + 1]
-		troop.team = Troop.TEAM_ENEMY
-		troop.max_health = t.max_health
-		troop.move_speed = t.move_speed
+	var i := 0
+	for troop in squad.get_children():
 		@warning_ignore("integer_division")
 		var offset := Vector3((i % 3 - 1) * spawn_spacing, 0.0, (i / 3) * spawn_spacing)
-		troop.position = _ground_point(origin + offset)
-		squad.add_child(troop)
+		(troop as Troop).position = _ground_point(origin + offset)
+		i += 1
 
-	(squad_parent if squad_parent else get_tree().current_scene).add_child(squad)
-	_enemy_squads.append(squad)
-	squad.wiped_out.connect(_on_squad_wiped_out)
+	_add_enemy_squad(squad)
 	_set_tickets(tickets - size)
 
 	# Let the nav agents register for a frame before giving orders
 	await get_tree().physics_frame
-	if is_instance_valid(squad):
-		squad.order_capture(_pick_target(squad.centroid()))
+	if not is_instance_valid(squad):
+		return
+	var target := _pick_target(squad.centroid())
+	if t.hunt_vehicles:
+		# Anti-tank team: set up near the objective it's sent to and hunt there
+		squad.order_hunt(target.global_position if target else squad.centroid())
+	else:
+		squad.order_capture(target)
+
+func _add_enemy_squad(squad: Squad) -> void:
+	(squad_parent if squad_parent else get_tree().current_scene).add_child(squad)
+	_enemy_squads.append(squad)
+	squad.wiped_out.connect(_on_squad_wiped_out)
+
+## One enemy vehicle, if there are tickets and room. Ground vehicles drive
+## from the spawn; AA emplacements are set up beside an objective the enemy
+## holds (it flew them in), or at the spawn if it holds none.
+func _spawn_vehicle() -> bool:
+	if spawn_points.is_empty() or enemy_vehicle_types.is_empty():
+		return false
+	if enemy_vehicle_types.size() > 0 and enemy_vehicle_alive_limit_reached():
+		return false
+	var max_tier := _max_tier()
+	var pool := enemy_vehicle_types.filter(func(vt): return vt.tier <= max_tier \
+		and vt.tickets + (vt.crew_squad.size if vt.crew_squad else 0) <= tickets)
+	if pool.is_empty():
+		return false
+	var t: VehicleType = pool.pick_random()
+	_squad_count += 1
+	var tag := "Enemy%s_%d" % [t.display_name.replace(" ", ""), _squad_count]
+
+	var spawn: Node3D = spawn_points.pick_random()
+	# Away from where the squads appear
+	var ring := randf() * TAU
+	var pos := spawn.global_position + Vector3(cos(ring), 0.0, sin(ring)) * randf_range(20.0, 35.0)
+	if t.sling_loaded:
+		var held := get_tree().get_nodes_in_group("Objectives").filter(func(o): return o.owner_team == Troop.TEAM_ENEMY)
+		if not held.is_empty():
+			var obj: Node3D = held.pick_random()
+			var angle := randf() * TAU
+			pos = obj.global_position + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(emplacement_distance.x, emplacement_distance.y)
+	pos = _ground_point(pos) - Vector3.UP * 0.8
+
+	var facing := Vector3.FORWARD
+	var first := _pick_target(pos)
+	if first:
+		facing = first.global_position - pos
+		facing.y = 0.0
+	var parent := vehicle_parent if vehicle_parent else get_tree().current_scene
+	var v := t.spawn(parent, Troop.TEAM_ENEMY, pos, facing, tag, troop_scene,
+		squad_parent if squad_parent else get_tree().current_scene)
+	if v == null:
+		return false
+	var cost := t.tickets
+	if is_instance_valid(v.squad):
+		cost += v.squad.members.size()
+		_enemy_squads.append(v.squad)
+		v.squad.wiped_out.connect(_on_squad_wiped_out)
+	_set_tickets(tickets - cost)
+	print("[Battle] Enemy %s deployed (%d tickets)" % [t.display_name, cost])
+	return true
+
+func enemy_vehicle_alive_limit_reached() -> bool:
+	return enemy_vehicles_alive() >= max_enemy_vehicles
 
 func _set_tickets(value: int) -> void:
 	tickets = maxi(value, 0)
@@ -242,7 +338,7 @@ func _check_defeat(delta: float) -> void:
 		enemy_hold_time = 0.0
 
 func _check_victory() -> void:
-	if tickets <= 0 and enemies_alive() == 0:
+	if tickets <= 0 and enemies_alive() == 0 and enemy_vehicles_alive() == 0:
 		_end(true)
 
 func _end(won: bool) -> void:
@@ -267,13 +363,16 @@ func _ground_point(p: Vector3) -> Vector3:
 		return p
 	return hit.position + Vector3.UP * 1.1
 
-func _load_types_from_dir() -> void:
-	var dir := DirAccess.open(squad_types_dir)
+## Every resource in a folder (SquadTypes, VehicleTypes)
+func _load_dir(path: String) -> Array[Resource]:
+	var out: Array[Resource] = []
+	var dir := DirAccess.open(path)
 	if dir == null:
-		return
+		return out
 	for file in dir.get_files():
-		var path := squad_types_dir.path_join(file.trim_suffix(".remap"))
-		if path.ends_with(".tres") or path.ends_with(".res"):
-			var t := load(path) as SquadType
-			if t:
-				enemy_squad_types.append(t)
+		var res_path := path.path_join(file.trim_suffix(".remap"))
+		if res_path.ends_with(".tres") or res_path.ends_with(".res"):
+			var r := load(res_path)
+			if r:
+				out.append(r)
+	return out

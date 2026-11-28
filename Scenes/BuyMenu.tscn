@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://Scenes/buy_menu.gd" id="1_menu"]
 [ext_resource type="Theme" path="res://Scenes/menu_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://Scenes/SquadRow.tscn" id="3_row"]
+[ext_resource type="PackedScene" path="res://Scenes/SectionHeader.tscn" id="4_header"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 16.0
@@ -77,15 +78,24 @@ theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
 theme_override_font_sizes/font_size = 18
 text = "Seats free  15 / 15"
 
-[node name="Rows" type="VBoxContainer" parent="Root/Center/Panel/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="Root/Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Root/Center/Panel/VBox/Scroll"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="PreviewRow" parent="Root/Center/Panel/VBox/Rows" instance=ExtResource("3_row")]
+[node name="PreviewHeader" parent="Root/Center/Panel/VBox/Scroll/Rows" instance=ExtResource("4_header")]
 layout_mode = 2
 
-[node name="PreviewRow2" parent="Root/Center/Panel/VBox/Rows" instance=ExtResource("3_row")]
+[node name="PreviewRow" parent="Root/Center/Panel/VBox/Scroll/Rows" instance=ExtResource("3_row")]
+layout_mode = 2
+
+[node name="PreviewRow2" parent="Root/Center/Panel/VBox/Scroll/Rows" instance=ExtResource("3_row")]
 layout_mode = 2
 
 [node name="Footer" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
@@ -96,7 +106,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
 theme_override_font_sizes/font_size = 14
-text = "Squads run to the aircraft and board.   B / Esc to close"
+text = "Squads run to the aircraft and board. Vehicles roll out from base.   B / Esc to close"
 vertical_alignment = 1
 
 [node name="CloseButton" type="Button" parent="Root/Center/Panel/VBox/Footer"]

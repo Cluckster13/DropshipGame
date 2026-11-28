@@ -1,0 +1,172 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle.gd" id="1_veh"]
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_weapon.gd" id="2_wpn"]
+
+[sub_resource type="BoxShape3D" id="Shape_hull"]
+size = Vector3(3, 2.2, 6.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_tint"]
+albedo_color = Color(0.3, 0.38, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_hull"]
+size = Vector3(3, 1.6, 6.5)
+
+[sub_resource type="BoxMesh" id="Mesh_nose"]
+size = Vector3(3, 0.8, 1.2)
+
+[sub_resource type="CylinderMesh" id="Mesh_wheel"]
+top_radius = 0.55
+bottom_radius = 0.55
+height = 0.4
+radial_segments = 12
+
+[sub_resource type="BoxMesh" id="Mesh_turret"]
+size = Vector3(1.2, 0.6, 1.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_barrel"]
+top_radius = 0.06
+bottom_radius = 0.07
+height = 1.5
+radial_segments = 8
+
+[node name="APC" type="CharacterBody3D" node_paths=PackedStringArray("tint_meshes", "model", "seats_root", "exit_point", "hide_when_destroyed")]
+script = ExtResource("1_veh")
+display_name = "APC"
+tint_meshes = [NodePath("Model/Hull"), NodePath("Model/Nose"), NodePath("Turret/TurretMesh")]
+max_health = 200.0
+bullet_armour = 0.02
+at_armour = 1.0
+charge_armour = 1.0
+flak_armour = 0.3
+aim_height = 1.4
+hull_radius = 3.0
+max_speed = 11.0
+turn_rate_deg = 45.0
+stop_to_fight = true
+model = NodePath("Model")
+seats_root = NodePath("Seats")
+exit_point = NodePath("Exit")
+hide_when_destroyed = [NodePath("Turret/Barrel")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Shape_hull")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Hull" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.2)
+mesh = SubResource("Mesh_hull")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="Nose" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 0.8660254, 0.5, 0, -0.5, 0.8660254, 0, 1.05, -3.1)
+mesh = SubResource("Mesh_nose")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="WheelFL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.5, 0.55, -2)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="WheelML" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.5, 0.55, 0.2)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="WheelRL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -1.5, 0.55, 2.4)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="WheelFR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.5, 0.55, -2)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="WheelMR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.5, 0.55, 0.2)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="WheelRR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 1.5, 0.55, 2.4)
+mesh = SubResource("Mesh_wheel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="Turret" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, -0.8)
+
+[node name="TurretMesh" type="MeshInstance3D" parent="Turret"]
+mesh = SubResource("Mesh_turret")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="Barrel" type="Node3D" parent="Turret"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.6)
+
+[node name="BarrelMesh" type="MeshInstance3D" parent="Turret/Barrel"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, -0.75)
+mesh = SubResource("Mesh_barrel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="MG" type="Node3D" parent="Turret/Barrel" node_paths=PackedStringArray("turret", "barrel", "muzzle")]
+script = ExtResource("2_wpn")
+targets_troops = true
+targets_aircraft = true
+max_range = 160.0
+reaction_time = 0.8
+turret = NodePath("../..")
+barrel = NodePath("..")
+muzzle = NodePath("Muzzle")
+turret_speed_deg = 70.0
+barrel_speed_deg = 50.0
+barrel_min_deg = -12.0
+barrel_max_deg = 45.0
+fire_cone_deg = 5.0
+damage = 22.0
+fire_rate = 7.0
+burst_time = 1.2
+burst_pause = 0.8
+spread_deg = 1.2
+spread_per_100m_deg = 0.8
+tracer_color = Color(1, 0.8, 0.4, 1)
+
+[node name="Muzzle" type="Marker3D" parent="Turret/Barrel/MG"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.6)
+
+[node name="Seats" type="Node3D" parent="."]
+
+[node name="Seat1" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.2, -1)
+
+[node name="Seat2" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.2, -1)
+
+[node name="Seat3" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.2, 0.3)
+
+[node name="Seat4" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.2, 0.3)
+
+[node name="Seat5" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.2, 1.6)
+
+[node name="Seat6" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.2, 1.6)
+
+[node name="Seat7" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.2, 2.6)
+
+[node name="Seat8" type="Marker3D" parent="Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.2, 2.6)
+
+[node name="Exit" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 4.4)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_height_offset = -0.5
+radius = 2.0

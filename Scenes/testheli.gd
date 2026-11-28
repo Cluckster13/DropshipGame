@@ -128,6 +128,9 @@ var _impact_grace : float = IMPACT_GRACE_TIME
 
 var rotor_rpm_current : float = 0.0
 var engine_on         : bool  = false
+## Extra world-space force applied every physics step (N). The SlingHook
+## sets this to the rope's pull while carrying a load.
+var external_force    : Vector3 = Vector3.ZERO
 
 # Collective: 0 = bottom, 0.5 = hover thrust (1 g), 1 = max thrust
 var _collective_current : float = 0.0
@@ -229,6 +232,10 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		v_body.z * absf(v_body.z) * areas.z) * drag_coefficient
 	drag_body -= v_body * low_speed_drag
 	state.apply_central_force(b * drag_body * mass)
+
+	# --- Sling load pulling on the hook (and anything else external)
+	if external_force != Vector3.ZERO:
+		state.apply_central_force(external_force)
 
 	# --- Attitude: cyclic / pedals command rotation rates
 	if rotor > 0.05 and not is_destroyed:

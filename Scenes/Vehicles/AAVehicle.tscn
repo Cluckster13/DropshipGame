@@ -1,0 +1,128 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle.gd" id="1_veh"]
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_weapon.gd" id="2_wpn"]
+
+[sub_resource type="BoxShape3D" id="Shape_hull"]
+size = Vector3(3.2, 2.2, 6.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_tint"]
+albedo_color = Color(0.3, 0.38, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_hull"]
+size = Vector3(2.8, 1.2, 6.5)
+
+[sub_resource type="BoxMesh" id="Mesh_track"]
+size = Vector3(0.6, 1, 6.6)
+
+[sub_resource type="BoxMesh" id="Mesh_turret"]
+size = Vector3(2, 1, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_radar"]
+size = Vector3(1.4, 0.6, 0.08)
+
+[sub_resource type="CylinderMesh" id="Mesh_barrel"]
+top_radius = 0.05
+bottom_radius = 0.07
+height = 2.4
+radial_segments = 8
+
+[node name="AAVehicle" type="CharacterBody3D" node_paths=PackedStringArray("tint_meshes", "model", "hide_when_destroyed")]
+script = ExtResource("1_veh")
+display_name = "AA Vehicle"
+tint_meshes = [NodePath("Model/Hull"), NodePath("Turret/TurretMesh")]
+max_health = 150.0
+bullet_armour = 0.03
+at_armour = 1.0
+charge_armour = 1.0
+flak_armour = 0.3
+chargeable = true
+aim_height = 1.6
+hull_radius = 3.0
+role = 1
+max_speed = 9.0
+turn_rate_deg = 40.0
+objective_standoff = 35.0
+stop_to_fight = true
+model = NodePath("Model")
+hide_when_destroyed = [NodePath("Turret/Guns"), NodePath("Turret/Radar")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Shape_hull")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Hull" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("Mesh_hull")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="TrackL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 0.5, 0)
+mesh = SubResource("Mesh_track")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="TrackR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 0.5, 0)
+mesh = SubResource("Mesh_track")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="Turret" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0.5)
+
+[node name="TurretMesh" type="MeshInstance3D" parent="Turret"]
+mesh = SubResource("Mesh_turret")
+surface_material_override/0 = SubResource("Mat_tint")
+
+[node name="Radar" type="MeshInstance3D" parent="Turret"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0.8)
+mesh = SubResource("Mesh_radar")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="Guns" type="Node3D" parent="Turret"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -0.6)
+
+[node name="BarrelL" type="MeshInstance3D" parent="Turret/Guns"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.6, 0, -1.2)
+mesh = SubResource("Mesh_barrel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="BarrelR" type="MeshInstance3D" parent="Turret/Guns"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0.6, 0, -1.2)
+mesh = SubResource("Mesh_barrel")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="AAGun" type="Node3D" parent="Turret/Guns" node_paths=PackedStringArray("turret", "barrel", "muzzle")]
+script = ExtResource("2_wpn")
+targets_troops = false
+targets_aircraft = true
+max_range = 450.0
+scan_interval = 0.4
+reaction_time = 1.2
+turret = NodePath("../..")
+barrel = NodePath("..")
+muzzle = NodePath("Muzzle")
+turret_speed_deg = 90.0
+barrel_speed_deg = 70.0
+barrel_min_deg = -5.0
+barrel_max_deg = 85.0
+fire_cone_deg = 6.0
+damage = 12.0
+damage_type = 3
+fire_rate = 12.0
+burst_time = 1.6
+burst_pause = 1.0
+spread_deg = 0.6
+spread_per_100m_deg = 0.5
+tracer_color = Color(1, 0.45, 0.3, 1)
+
+[node name="Muzzle" type="Marker3D" parent="Turret/Guns/AAGun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_height_offset = -0.5
+radius = 2.0

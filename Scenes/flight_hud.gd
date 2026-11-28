@@ -57,6 +57,8 @@ extends CanvasLayer
 @onready var troops_value : Label = %TroopsValue
 @onready var boarding_label : Label = %Boarding
 @onready var hint_label : Label = %Hint
+@onready var sling_label : Label = %Sling
+@onready var aa_warning_label : Label = %AAWarning
 
 ## Toggles ~1.25 times a second, for blinking warnings
 var blink_on : bool = true
@@ -220,6 +222,27 @@ func _refresh_troops() -> void:
 	var landed := aircraft != null and aircraft.is_landed()
 	hint_label.text = "F  load    U  unload" if landed else "land to load / unload"
 	hint_label.add_theme_color_override("font_color", text_color if landed else dim_color)
+
+	# Sling load prompt / status
+	var hook := _sling_hook()
+	var sling_text := hook.status_text() if hook else ""
+	sling_label.visible = sling_text != ""
+	sling_label.text = sling_text
+
+	# Enemy flak is shooting at us (set by VehicleWeapon on its target)
+	var aa_until: int = aircraft.get_meta("aa_warning_until", 0) if aircraft else 0
+	var under_aa := not aircraft.is_destroyed and Time.get_ticks_msec() < aa_until if aircraft else false
+	aa_warning_label.visible = under_aa
+	if under_aa:
+		aa_warning_label.add_theme_color_override("font_color", enemy_color if blink_on else warn_color)
+
+func _sling_hook() -> SlingHook:
+	if aircraft == null:
+		return null
+	for c in aircraft.get_children():
+		if c is SlingHook:
+			return c
+	return null
 
 # ---------------------------------------------------------------- helpers
 

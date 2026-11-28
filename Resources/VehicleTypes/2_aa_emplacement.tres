@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="VehicleType" format=3]
+
+[ext_resource type="Script" path="res://Scenes/Vehicles/vehicle_type.gd" id="1_vt"]
+[ext_resource type="PackedScene" path="res://Scenes/Vehicles/AAEmplacement.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_vt")
+display_name = "AA Emplacement"
+tier = 2
+description = "A static flak gun. Appears packed beside the helicopter: hover over it, hook it with H, fly it out and set it down where you want air cover."
+cost = 400
+tickets = 6
+scene = ExtResource("2_scene")
+sling_loaded = true
+stats = "Static   ·   Flak vs aircraft, 400 m"
