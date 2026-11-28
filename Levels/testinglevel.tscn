@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://pmghheiqrfoy"]
 
-[ext_resource type="Texture2D" uid="uid://b64yawsoxkdqf" path="res://Assets/Dev/Orange/texture_09.png" id="1_3mpq8"]
-[ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_8etmp"]
-[ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/Troop.tscn" id="3_8nb80"]
-[ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="4_um744"]
-[ext_resource type="Script" uid="uid://c4lwmva67ur0n" path="res://Scenes/squad.gd" id="5_ea35m"]
-[ext_resource type="PackedScene" uid="uid://714h6hneyr13" path="res://Scenes/Objective.tscn" id="5_k0mcv"]
+[ext_resource type="PackedScene" uid="uid://drhlkodki1tpi" path="res://Scenes/testheli.tscn" id="1_xqndw"]
+[ext_resource type="PackedScene" uid="uid://5s8d1a46i8ml" path="res://Scenes/HUDv1.tscn" id="2_4mhc3"]
+[ext_resource type="Texture2D" uid="uid://b64yawsoxkdqf" path="res://Assets/Dev/Orange/texture_09.png" id="3_4bnrs"]
+[ext_resource type="Script" uid="uid://c4lwmva67ur0n" path="res://Scenes/squad.gd" id="4_fy13n"]
+[ext_resource type="PackedScene" uid="uid://rek1t631f3la" path="res://Scenes/Troop.tscn" id="5_iojnc"]
+[ext_resource type="PackedScene" uid="uid://714h6hneyr13" path="res://Scenes/Objective.tscn" id="6_806b4"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_g4v7s"]
 vertices = PackedVector3Array(-3552.8647, 1, -3300.0806, -3552.8647, 1, 3299.9194, 3554.1353, 1, 3299.9194, 3554.1353, 1, -3300.0806)
@@ -14,19 +14,19 @@ geometry_parsed_geometry_type = 1
 cell_size = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8nb80"]
-albedo_texture = ExtResource("1_3mpq8")
+albedo_texture = ExtResource("3_4bnrs")
 uv1_scale = Vector3(0.04, 0.04, 0.04)
 uv1_triplanar = true
 
 [node name="Test1" type="Node3D" unique_id=109895588]
 
-[node name="TestHelicopter" parent="." unique_id=753352377 instance=ExtResource("1_8etmp")]
+[node name="TestHelicopter" parent="." unique_id=753352377 instance=ExtResource("1_xqndw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.945728, 6.6995373, -0.51891136)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=447569339]
 transform = Transform3D(1, 0, 0, 0, 0.8957118, 0.44463518, 0, -0.44463518, 0.8957118, 0, 0, 0)
 
-[node name="TestHud" parent="." unique_id=1310896166 node_paths=PackedStringArray("test_helicopter", "friendly_troop") instance=ExtResource("4_um744")]
+[node name="TestHud" parent="." unique_id=1310896166 node_paths=PackedStringArray("test_helicopter", "friendly_troop") instance=ExtResource("2_4mhc3")]
 test_helicopter = NodePath("../TestHelicopter")
 friendly_troop = NodePath("../SquadAlpha/FriendlyTroop")
 
@@ -41,65 +41,65 @@ collision_mask = 3
 size = Vector3(7111.7295, 1, 6606.161)
 
 [node name="SquadAlpha" type="Node" parent="." unique_id=1665787738]
-script = ExtResource("5_ea35m")
+script = ExtResource("4_fy13n")
 
-[node name="FriendlyTroop" parent="SquadAlpha" unique_id=84826896 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop" parent="SquadAlpha" unique_id=84826896 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 1.9073486e-06)
 
-[node name="FriendlyTroop2" parent="SquadAlpha" unique_id=1113034224 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop2" parent="SquadAlpha" unique_id=1113034224 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 2.7507405)
 
-[node name="FriendlyTroop3" parent="SquadAlpha" unique_id=1249756064 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop3" parent="SquadAlpha" unique_id=1249756064 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.335176, 5.493927, 5.308772)
 
-[node name="FriendlyTroop4" parent="SquadAlpha" unique_id=1224247765 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop4" parent="SquadAlpha" unique_id=1224247765 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.36467, 5.493927, 2.7507405)
 
-[node name="FriendlyTroop5" parent="SquadAlpha" unique_id=1261038049 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop5" parent="SquadAlpha" unique_id=1261038049 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.065529, 5.493927, 4.75553)
 
 [node name="SquadBravo" type="Node" parent="." unique_id=190103134]
-script = ExtResource("5_ea35m")
+script = ExtResource("4_fy13n")
 squad_name = "Bravo"
 
-[node name="FriendlyTroop6" parent="SquadBravo" unique_id=1983144150 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop6" parent="SquadBravo" unique_id=1983144150 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.393619, 5.493927, 0.09097767)
 
-[node name="FriendlyTroop7" parent="SquadBravo" unique_id=1246016539 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop7" parent="SquadBravo" unique_id=1246016539 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.937799, 5.493927, 4.3937154)
 
-[node name="FriendlyTroop8" parent="SquadBravo" unique_id=1535276002 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop8" parent="SquadBravo" unique_id=1535276002 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.724744, 5.493927, 0.5322747)
 
-[node name="FriendlyTroop9" parent="SquadBravo" unique_id=790742172 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop9" parent="SquadBravo" unique_id=790742172 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.839201, 5.493927, 1.3860765)
 
-[node name="FriendlyTroop10" parent="SquadBravo" unique_id=2088793360 instance=ExtResource("3_8nb80")]
+[node name="FriendlyTroop10" parent="SquadBravo" unique_id=2088793360 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.637201, 5.493927, 2.6679325)
 
 [node name="EnemySquadRed" type="Node" parent="." unique_id=722725129]
-script = ExtResource("5_ea35m")
+script = ExtResource("4_fy13n")
 squad_name = "Red"
 team = -1
 auto_advance = false
 
-[node name="Red1" parent="EnemySquadRed" unique_id=1850983498 instance=ExtResource("3_8nb80")]
+[node name="Red1" parent="EnemySquadRed" unique_id=1850983498 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.5, 20)
 
-[node name="Red2" parent="EnemySquadRed" unique_id=1488632379 instance=ExtResource("3_8nb80")]
+[node name="Red2" parent="EnemySquadRed" unique_id=1488632379 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 25)
 
-[node name="Red3" parent="EnemySquadRed" unique_id=1520753922 instance=ExtResource("3_8nb80")]
+[node name="Red3" parent="EnemySquadRed" unique_id=1520753922 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 1.5, 20)
 
-[node name="Red4" parent="EnemySquadRed" unique_id=577672500 instance=ExtResource("3_8nb80")]
+[node name="Red4" parent="EnemySquadRed" unique_id=577672500 instance=ExtResource("5_iojnc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 15)
 
 [node name="Objectives" type="Node" parent="." unique_id=1814417269]
 
-[node name="Objective_A" parent="Objectives" unique_id=1836356735 instance=ExtResource("5_k0mcv")]
+[node name="Objective_A" parent="Objectives" unique_id=1836356735 instance=ExtResource("6_806b4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0.5, 20)
 initial_owner = -1
 
-[node name="Objective_B" parent="Objectives" unique_id=2070778633 instance=ExtResource("5_k0mcv")]
+[node name="Objective_B" parent="Objectives" unique_id=2070778633 instance=ExtResource("6_806b4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1318.9136)

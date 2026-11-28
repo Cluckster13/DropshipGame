@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://d4iix0xfovypl" path="res://Scenes/door_gun.gd" id="7_1qnl8"]
 [ext_resource type="PackedScene" uid="uid://b8e5eya8fgpm2" path="res://Scenes/loading_trigger.tscn" id="7_y27xj"]
 [ext_resource type="Script" uid="uid://dcc7c6josmxe2" path="res://Scenes/gunner_controller.gd" id="8_gk8nd"]
-[ext_resource type="Script" uid="uid://b3vbb8w6lfvp8" path="res://Scenes/flight_hud.gd" id="11_gqdeq"]
+[ext_resource type="PackedScene" uid="uid://b043fgdbo55gh" path="res://Scenes/FlightHUD.tscn" id="11_gqdeq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
 size = Vector3(5.5733643, 5.1016846, 25.402832)
@@ -34,7 +34,7 @@ fov = 80.0
 script = ExtResource("2_p7jay")
 orbit_distance = 18.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=982059199]
+[node name="HeliMainBodyCollision" type="CollisionShape3D" parent="." unique_id=982059199]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.010147095, 2.5816295, 0.068481445)
 shape = SubResource("BoxShape3D_etpvc")
 
@@ -149,11 +149,10 @@ script = ExtResource("8_gk8nd")
 guns = [NodePath("../DoorGunLeft"), NodePath("../DoorGunRight")]
 orbit_camera = NodePath("../Camera3D")
 
-[node name="FlightHUD" type="CanvasLayer" parent="." unique_id=1722375181]
-script = ExtResource("11_gqdeq")
-
 [node name="RotorCollision" type="CollisionShape3D" parent="." unique_id=1827225395]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.444254, 4.100878)
 shape = SubResource("CylinderShape3D_g4v7s")
+
+[node name="FlightHUD" parent="." unique_id=831605873 instance=ExtResource("11_gqdeq")]
 
 [editable path="BlackhawkV2"]

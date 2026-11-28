@@ -1,0 +1,272 @@
+[gd_scene format=3 uid="uid://b043fgdbo55gh"]
+
+[ext_resource type="Script" uid="uid://b3vbb8w6lfvp8" path="res://Scenes/flight_hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://Scenes/hud_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://Scenes/ObjectiveWidget.tscn" id="3_widget"]
+
+[node name="FlightHUD" type="CanvasLayer" unique_id=831605873]
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="." unique_id=997719457]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="HitFlash" type="ColorRect" parent="Root" unique_id=1863408292]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.8, 0, 0, 0)
+
+[node name="TopCenter" type="VBoxContainer" parent="Root" unique_id=12876116]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TicketsPanel" type="PanelContainer" parent="Root/TopCenter" unique_id=838974542]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="Row" type="HBoxContainer" parent="Root/TopCenter/TicketsPanel" unique_id=1325726878]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Caption" type="Label" parent="Root/TopCenter/TicketsPanel/Row" unique_id=331895750]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+theme_override_font_sizes/font_size = 14
+text = "ENEMY TICKETS"
+vertical_alignment = 1
+
+[node name="TicketsValue" type="Label" parent="Root/TopCenter/TicketsPanel/Row" unique_id=1827385252]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 22
+text = "150"
+vertical_alignment = 1
+
+[node name="WaveLabel" type="Label" parent="Root/TopCenter/TicketsPanel/Row" unique_id=115061864]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+theme_override_font_sizes/font_size = 14
+text = "·  next wave 0:20"
+vertical_alignment = 1
+
+[node name="Objectives" type="HBoxContainer" parent="Root/TopCenter" unique_id=380815639]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PreviewA" parent="Root/TopCenter/Objectives" unique_id=1798146458 instance=ExtResource("3_widget")]
+layout_mode = 2
+
+[node name="PreviewB" parent="Root/TopCenter/Objectives" unique_id=1312775172 instance=ExtResource("3_widget")]
+layout_mode = 2
+
+[node name="PreviewC" parent="Root/TopCenter/Objectives" unique_id=1066278639 instance=ExtResource("3_widget")]
+layout_mode = 2
+
+[node name="Warning" type="Label" parent="Root/TopCenter" unique_id=589522119]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
+text = "ENEMY HOLDS ALL OBJECTIVES  —  DEFEAT IN 30s"
+horizontal_alignment = 1
+
+[node name="Banner" type="VBoxContainer" parent="Root" unique_id=577165306]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BannerTitle" type="Label" parent="Root/Banner" unique_id=1741423406]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 72
+text = "VICTORY"
+horizontal_alignment = 1
+
+[node name="BannerSub" type="Label" parent="Root/Banner" unique_id=1800277912]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Enemy reinforcements exhausted
+Press Enter to play again"
+horizontal_alignment = 1
+
+[node name="Destroyed" type="Label" parent="Root" unique_id=967791388]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 40
+text = "AIRCRAFT DESTROYED
+New aircraft at base in 10s"
+horizontal_alignment = 1
+
+[node name="Flight" type="PanelContainer" parent="Root" unique_id=1266176606]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = -16.0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Grid" type="GridContainer" parent="Root/Flight" unique_id=559201635]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 2
+columns = 2
+
+[node name="SpeedCaption" type="Label" parent="Root/Flight/Grid" unique_id=641597269]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+text = "SPD"
+
+[node name="Speed" type="Label" parent="Root/Flight/Grid" unique_id=1177658653]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0 km/h"
+
+[node name="AltCaption" type="Label" parent="Root/Flight/Grid" unique_id=1459291459]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+text = "ALT"
+
+[node name="Altitude" type="Label" parent="Root/Flight/Grid" unique_id=222640256]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0 m"
+
+[node name="VSCaption" type="Label" parent="Root/Flight/Grid" unique_id=1532737588]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+text = "V/S"
+
+[node name="VerticalSpeed" type="Label" parent="Root/Flight/Grid" unique_id=1052011977]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+0.0 m/s"
+
+[node name="HullCaption" type="Label" parent="Root/Flight/Grid" unique_id=792115987]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+text = "HULL"
+
+[node name="Hull" type="Label" parent="Root/Flight/Grid" unique_id=850395615]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "100%"
+
+[node name="StateCaption" type="Label" parent="Root/Flight/Grid" unique_id=328093496]
+layout_mode = 2
+
+[node name="State" type="Label" parent="Root/Flight/Grid" unique_id=1988580012]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.25, 1)
+text = "ENGINE OFF  (R)"
+
+[node name="Troops" type="PanelContainer" parent="Root" unique_id=95351892]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="Root/Troops" unique_id=276080074]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Funds" type="Label" parent="Root/Troops/VBox" unique_id=2049581131]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.25, 1)
+theme_override_font_sizes/font_size = 24
+text = "$ 1000"
+horizontal_alignment = 2
+
+[node name="TroopsCaption" type="Label" parent="Root/Troops/VBox" unique_id=606892876]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+text = "TROOPS"
+horizontal_alignment = 2
+
+[node name="TroopsValue" type="Label" parent="Root/Troops/VBox" unique_id=895231696]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0 / 15"
+horizontal_alignment = 2
+
+[node name="Boarding" type="Label" parent="Root/Troops/VBox" unique_id=739504470]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.25, 1)
+text = "4 boarding"
+horizontal_alignment = 2
+
+[node name="Hint" type="Label" parent="Root/Troops/VBox" unique_id=118457604]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+theme_override_font_sizes/font_size = 16
+text = "F  load    U  unload"
+horizontal_alignment = 2

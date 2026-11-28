@@ -1,25 +1,26 @@
 class_name ObjectiveMarker
 extends Sprite3D
 ## Floating badge over an objective, readable from the cockpit:
-##   - a disc with the objective's letter, coloured by who owns it
+##   - a disc with the objective's letter (%Letter), coloured by owner
 ##   - a ring around it that fills with capture progress (blue/red)
-##   - the status underneath (CAPTURING 45%, CONTESTED, SECURED...)
-## Always faces the camera, stays the same size on screen at any distance and
-## draws through terrain/trees. Put it on a Sprite3D child of an Objective;
-## the node's height above the objective is where the badge floats.
+##   - the status underneath (%Status: CAPTURING 45%, CONTESTED, SECURED...)
+##
+## The look is set on the nodes in Objective.tscn: this Sprite3D's billboard /
+## fixed size / pixel size, and the two Label3D children's fonts, sizes,
+## outlines and offsets. This script only draws the disc + ring texture (it
+## changes with capture progress, so it's generated) and sets text/colours.
+## The node's height above the objective is where the badge floats.
 
 ## Defaults to the parent
 @export var objective : Objective
-
-@export_group("Size")
-## On-screen size of everything. Bigger = larger badge.
-@export var badge_pixel_size : float = 0.0011
-@export var texture_size : int = 128
-@export var ring_width : int = 12
-@export var letter_font_size : int = 72
-@export var status_font_size : int = 34
 ## Hide when the camera is closer than this (m). 0 = always show.
 @export var hide_within : float = 0.0
+
+@export_group("Disc")
+## Resolution of the generated disc texture (its on-screen size comes from
+## this node's pixel_size)
+@export var texture_size : int = 128
+@export var ring_width : int = 12
 
 @export_group("Colours")
 @export var friendly_color : Color = Color(0.3, 0.55, 1.0)
@@ -31,8 +32,9 @@ extends Sprite3D
 
 const REFRESH_INTERVAL := 0.1
 
-var _letter : Label3D
-var _status : Label3D
+@onready var letter_label : Label3D = %Letter
+@onready var status_label : Label3D = %Status
+
 var _image : Image
 var _tex : ImageTexture
 var _pixels : PackedByteArray
@@ -47,25 +49,10 @@ var _timer : float = 0.0
 func _ready() -> void:
 	if objective == null:
 		objective = get_parent() as Objective
-	billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	fixed_size = true
-	no_depth_test = true
-	shaded = false
-	double_sided = true
-	pixel_size = badge_pixel_size
-	texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	render_priority = 1
-
 	_build_geometry()
 	_image = Image.create_empty(texture_size, texture_size, false, Image.FORMAT_RGBA8)
 	_tex = ImageTexture.create_from_image(_image)
 	texture = _tex
-
-	_letter = _make_label(letter_font_size, 4)
-	_status = _make_label(status_font_size, 4)
-	# Label offsets are in the same pixel units as the texture, so the status
-	# line sits just under the disc at every distance
-	_status.offset = Vector2(0, -(texture_size * 0.5 + status_font_size * 0.75))
 	_refresh()
 
 func _process(delta: float) -> void:
@@ -90,18 +77,18 @@ func _refresh() -> void:
 	var blink := int(Time.get_ticks_msec() / 400.0) % 2 == 0
 
 	# Letter: owner colour
-	_letter.text = objective.get_label()
-	_letter.modulate = _team_color(objective.owner_team)
+	letter_label.text = objective.get_label()
+	letter_label.modulate = _team_color(objective.owner_team)
 
 	# Status line
 	var text: String = info["text"]
 	if info["active"]:
 		text += "  %d%%" % roundi(absf(progress) * 100.0)
-	_status.text = text
+	status_label.text = text
 	if info["contested"]:
-		_status.modulate = contested_color if blink else contested_color.darkened(0.5)
+		status_label.modulate = contested_color if blink else contested_color.darkened(0.5)
 	else:
-		_status.modulate = _team_color(info["team"])
+		status_label.modulate = _team_color(info["team"])
 
 	# Ring: only redraw when it visibly changes
 	var ring_col := friendly_color if progress > 0.0 else enemy_color
@@ -117,7 +104,7 @@ func _team_color(team: int) -> Color:
 		return enemy_color
 	return neutral_color
 
-# ---------------------------------------------------------------- drawing
+# ---------------------------------------------------------------- disc texture
 
 func _build_geometry() -> void:
 	var n := texture_size * texture_size
@@ -154,22 +141,3 @@ func _draw_badge(fill: float, fill_color: Color) -> void:
 		_pixels[p + 3] = int(col.a * 255.0)
 	_image.set_data(texture_size, texture_size, false, Image.FORMAT_RGBA8, _pixels)
 	_tex.update(_image)
-
-func _make_label(size: int, outline: int) -> Label3D:
-	var l := Label3D.new()
-	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	l.fixed_size = true
-	l.no_depth_test = true
-	l.shaded = false
-	l.double_sided = true
-	l.pixel_size = badge_pixel_size
-	l.font_size = size
-	l.outline_size = outline * 3
-	l.outline_modulate = Color(0, 0, 0, 0.85)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	# Draw after the badge so text sits on top of it
-	l.render_priority = 3
-	l.outline_render_priority = 2
-	add_child(l)
-	return l

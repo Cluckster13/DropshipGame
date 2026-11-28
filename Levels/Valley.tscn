@@ -411,7 +411,6 @@ compositor = SubResource("Compositor_57qmd")
 
 [node name="TestHelicopter" parent="Entities" unique_id=753352377 instance=ExtResource("15_ylspc")]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -53.14979, 2.110949, 838.83386)
-belly_drag_start_deg = 5.0
 
 [node name="Objective_A" parent="Entities" unique_id=1836356735 instance=ExtResource("2_2vmyw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -783.76514, 7.6006317, -861.9842)
@@ -513,6 +512,7 @@ squad_parent = NodePath("../../Entities")
 [node name="ProtonScatter" type="Node3D" parent="World" unique_id=1488324623]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 845.3425, 3.1150665, -1011.468)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_ylspc")
 Performance/use_chunks = true
@@ -532,6 +532,7 @@ shape = SubResource("Resource_g8bsm")
 [node name="ProtonScatter2" type="Node3D" parent="World/ProtonScatter" unique_id=54485908]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -638.28613, 0, 670.74304)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_idixk")
 Performance/use_chunks = true
@@ -551,6 +552,7 @@ shape = SubResource("Resource_q8nlf")
 [node name="ProtonScatter3" type="Node3D" parent="World/ProtonScatter" unique_id=1315761661]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1399.071, 0, 97.07446)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_u661t")
 Performance/use_chunks = true
@@ -570,6 +572,7 @@ shape = SubResource("Resource_88xcl")
 [node name="ProtonScatter4" type="Node3D" parent="World/ProtonScatter" unique_id=1004019444]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1197.8364, 0, -822.68774)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_l4kpu")
 Performance/use_chunks = true
@@ -589,6 +592,7 @@ shape = SubResource("Resource_guj6q")
 [node name="ProtonScatter5" type="Node3D" parent="World/ProtonScatter" unique_id=556059923]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -78.46643, 0, -968.27954)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_ahof7")
 Performance/use_chunks = true
@@ -608,6 +612,7 @@ shape = SubResource("Resource_0y0mi")
 [node name="ProtonScatter6" type="Node3D" parent="World/ProtonScatter" unique_id=1068816704]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 906.49194, 0, -958.31616)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_hpw0x")
 Performance/use_chunks = true
@@ -627,6 +632,7 @@ shape = SubResource("Resource_v6pfm")
 [node name="ProtonScatter7" type="Node3D" parent="World/ProtonScatter" unique_id=1585842706]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1472.167, 0, 1197.6313)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_vcljl")
 Performance/use_chunks = true
@@ -646,6 +652,7 @@ shape = SubResource("Resource_31wa3")
 [node name="ProtonScatter8" type="Node3D" parent="World/ProtonScatter" unique_id=541184379]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -276.91357, 0, 1750.4856)
 script = ExtResource("5_5pfs7")
+keep_static_colliders = true
 force_rebuild_on_load = false
 modifier_stack = SubResource("Resource_re560")
 Performance/use_chunks = true

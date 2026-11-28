@@ -48,8 +48,39 @@ wait_time = 0.25
 
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=333649275]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 135.89694, 0)
+pixel_size = 0.0011
 billboard = 1
+no_depth_test = true
+fixed_size = true
+render_priority = 1
 script = ExtResource("2_ear84")
+
+[node name="Letter" type="Label3D" parent="Sprite3D" unique_id=2030547468]
+unique_name_in_owner = true
+pixel_size = 0.0011
+billboard = 1
+no_depth_test = true
+fixed_size = true
+render_priority = 3
+outline_render_priority = 2
+modulate = Color(0.9, 0.9, 0.9, 1)
+outline_modulate = Color(0, 0, 0, 0.85)
+text = "A"
+font_size = 72
+
+[node name="Status" type="Label3D" parent="Sprite3D" unique_id=1864954665]
+unique_name_in_owner = true
+pixel_size = 0.0011
+offset = Vector2(0, -89.5)
+billboard = 1
+no_depth_test = true
+fixed_size = true
+render_priority = 3
+outline_render_priority = 2
+modulate = Color(0.9, 0.9, 0.9, 1)
+outline_modulate = Color(0, 0, 0, 0.85)
+text = "NEUTRAL"
+font_size = 34
 
 [connection signal="body_entered" from="CaptureArea" to="." method="_on_capture_area_body_entered"]
 [connection signal="body_exited" from="CaptureArea" to="." method="_on_capture_area_body_exited"]

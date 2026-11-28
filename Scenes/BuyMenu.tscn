@@ -1,0 +1,107 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Scenes/buy_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://Scenes/menu_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://Scenes/SquadRow.tscn" id="3_row"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.05, 0.08, 0.05, 0.92)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="BuyMenu" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_menu")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(680, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/Center/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "REQUISITION"
+
+[node name="Funds" type="Label" parent="Root/Center/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+text = "$ 1000"
+
+[node name="Seats" type="Label" parent="Root/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+theme_override_font_sizes/font_size = 18
+text = "Seats free  15 / 15"
+
+[node name="Rows" type="VBoxContainer" parent="Root/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PreviewRow" parent="Root/Center/Panel/VBox/Rows" instance=ExtResource("3_row")]
+layout_mode = 2
+
+[node name="PreviewRow2" parent="Root/Center/Panel/VBox/Rows" instance=ExtResource("3_row")]
+layout_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="Root/Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Root/Center/Panel/VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.55, 0.7, 0.55, 1)
+theme_override_font_sizes/font_size = 14
+text = "Squads run to the aircraft and board.   B / Esc to close"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Root/Center/Panel/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Close"

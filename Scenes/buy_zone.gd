@@ -10,6 +10,10 @@ extends Area3D
 @export var squad_types : Array[SquadType] = []
 @export_dir var squad_types_dir : String = "res://Resources/SquadTypes"
 @export var troop_scene : PackedScene = preload("res://Scenes/Troop.tscn")
+## The requisition screen and the on-screen "B - Requisition troops" prompt
+## (both are scenes, edit their layout there)
+@export var menu_scene : PackedScene = preload("res://Scenes/BuyMenu.tscn")
+@export var prompt_scene : PackedScene = preload("res://Scenes/BuyPrompt.tscn")
 ## Where bought troops appear. Empty = beside the aircraft's loading door.
 @export var spawn_point : Node3D
 @export var spawn_distance_from_aircraft : float = 14.0
@@ -37,7 +41,7 @@ func _ready() -> void:
 		_load_types_from_dir()
 	squad_types.sort_custom(func(a, b): return a.tier < b.tier or (a.tier == b.tier and a.cost < b.cost))
 
-	_menu = BuyMenu.new()
+	_menu = menu_scene.instantiate() as BuyMenu
 	_menu.visible = false
 	add_child(_menu)
 	_menu.set_squad_types(squad_types)
@@ -217,20 +221,9 @@ func _load_types_from_dir() -> void:
 # ---------------------------------------------------------------- prompt
 
 func _build_prompt() -> void:
-	_prompt_layer = CanvasLayer.new()
-	_prompt_layer.layer = 15
+	_prompt_layer = prompt_scene.instantiate() as CanvasLayer
 	add_child(_prompt_layer)
-	_prompt = Label.new()
-	_prompt.add_theme_font_size_override("font_size", 20)
-	_prompt.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
-	_prompt.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
-	_prompt.add_theme_constant_override("shadow_offset_x", 1)
-	_prompt.add_theme_constant_override("shadow_offset_y", 1)
-	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt_layer.add_child(_prompt)
-	_prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE, 70)
-	_prompt.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_prompt.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_prompt = _prompt_layer.get_node("%Prompt") as Label
 
 func _update_prompt() -> void:
 	if _menu.visible or not is_instance_valid(_aircraft):

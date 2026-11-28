@@ -121,6 +121,10 @@ var is_destroyed : bool = false
 var respawn_time_left : float = 0.0
 var _spawn_transform : Transform3D
 var _last_velocity : Vector3 = Vector3.ZERO
+## No crash damage this soon after (re)spawning, so settling onto the pad
+## from wherever it was placed doesn't count as a crash
+const IMPACT_GRACE_TIME := 2.0
+var _impact_grace : float = IMPACT_GRACE_TIME
 
 var rotor_rpm_current : float = 0.0
 var engine_on         : bool  = false
@@ -152,7 +156,8 @@ func _process(delta: float) -> void:
 	if is_destroyed and respawn_delay > 0.0:
 		respawn_time_left = maxf(respawn_time_left - delta, 0.0)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_impact_grace = maxf(_impact_grace - delta, 0.0)
 	_check_impact()
 
 # ─── Input ────────────────────────────────────────────────────────────────────
@@ -298,7 +303,7 @@ func repair(amount: float) -> void:
 func _check_impact() -> void:
 	var change := (linear_velocity - _last_velocity).length()
 	_last_velocity = linear_velocity
-	if change > impact_damage_threshold and not freeze:
+	if change > impact_damage_threshold and not freeze and _impact_grace <= 0.0:
 		take_damage((change - impact_damage_threshold) * impact_damage_per_speed, null, true)
 
 func _destroy() -> void:
@@ -330,6 +335,7 @@ func _respawn() -> void:
 	rotor_rpm_current = 0.0
 	health = max_health
 	is_destroyed = false
+	_impact_grace = IMPACT_GRACE_TIME
 	await get_tree().physics_frame
 	freeze = false
 	print("[Heli] respawned")
