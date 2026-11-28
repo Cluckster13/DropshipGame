@@ -84,21 +84,21 @@ team = -1
 auto_advance = false
 
 [node name="Red1" parent="EnemySquadRed" unique_id=1850983498 instance=ExtResource("5_iojnc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.5, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 411.4796, 1.5, 20)
 
 [node name="Red2" parent="EnemySquadRed" unique_id=1488632379 instance=ExtResource("5_iojnc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 416.4796, 1.5, 25)
 
 [node name="Red3" parent="EnemySquadRed" unique_id=1520753922 instance=ExtResource("5_iojnc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 1.5, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 421.4796, 1.5, 20)
 
 [node name="Red4" parent="EnemySquadRed" unique_id=577672500 instance=ExtResource("5_iojnc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 1.5, 15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 416.4796, 1.5, 15)
 
 [node name="Objectives" type="Node" parent="." unique_id=1814417269]
 
 [node name="Objective_A" parent="Objectives" unique_id=1836356735 instance=ExtResource("6_806b4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0.5, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 416.4796, 0.5, 20)
 initial_owner = -1
 
 [node name="Objective_B" parent="Objectives" unique_id=2070778633 instance=ExtResource("6_806b4")]

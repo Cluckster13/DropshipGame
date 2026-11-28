@@ -13,6 +13,13 @@ extends Node3D
 ##   crosshair) and the trigger state. The camera stays fixed to the mount;
 ##   only the gun pivots, light-gun style.
 
+## Every round fired (sound, muzzle flash...)
+signal fired
+## Trigger pulled with the barrels stopped: they start winding up
+signal spin_up_started
+## Trigger let go before the barrels reached firing speed
+signal spin_up_cancelled
+
 @export_group("Arc")
 ## Max swing left/right of straight out the door (degrees)
 @export var yaw_limit_deg : float = 75.0
@@ -26,6 +33,9 @@ extends Node3D
 @export var damage    : float = 34.0        ## 3 hits kills a 100hp troop
 @export var max_range : float = 200.0
 @export var manual_spread_deg : float = 0.6
+## Seconds for the barrels to wind up from a stop before the first round.
+## Already spinning (e.g. between AI bursts) = shorter wait.
+@export var spin_up_time : float = 0.6
 @export_range(-1, 1, 1) var team : int = Troop.TEAM_FRIENDLY
 
 @export_group("AI gunner")
@@ -97,6 +107,9 @@ var _burst_timer := 0.0
 var _bursting := true
 var _barrels : Node3D = null
 var _spin : float = 0.0   ## 0..1 barrel spin-up
+var _spinning_up : bool = false   ## winding up, not yet at firing speed
+var _ai_wants_spin : bool = false
+var _ai_can_shoot : bool = false
 
 func _ready() -> void:
 	aircraft = _find_aircraft()
@@ -107,17 +120,39 @@ func _physics_process(delta: float) -> void:
 	_cooldown -= delta
 	if aircraft and aircraft.has_method("is_alive") and not aircraft.is_alive():
 		return   # shot down: guns are silent
+	# Trigger: wants the barrels turning / can actually put rounds out
+	var wants_spin := false
+	var can_shoot := false
+	var spread := manual_spread_deg
 	if manual_control:
 		_slew_toward(manual_aim_point, manual_slew_speed_deg, delta)
-		if trigger_held and _cooldown <= 0.0:
-			_fire(manual_spread_deg)
+		wants_spin = trigger_held
+		can_shoot = trigger_held
 	elif ai_enabled:
 		_ai_tick(delta)
+		wants_spin = _ai_wants_spin
+		can_shoot = _ai_can_shoot
+		spread = ai_spread_deg
 	yaw_pivot.rotation.y = _yaw
 	pitch_pivot.rotation.x = _pitch
 
-	if _barrels:
+	# Barrels wind up before the first round, and coast down after
+	if wants_spin:
+		if _spin < 1.0 and not _spinning_up:
+			_spinning_up = true
+			spin_up_started.emit()
+		_spin = minf(_spin + delta / maxf(spin_up_time, 0.01), 1.0)
+		if _spin >= 1.0:
+			_spinning_up = false
+			if can_shoot and _cooldown <= 0.0:
+				_fire(spread)
+	else:
+		if _spinning_up:
+			_spinning_up = false
+			spin_up_cancelled.emit()
 		_spin = maxf(_spin - delta / barrel_spin_down_time, 0.0)
+
+	if _barrels:
 		_barrels.rotate_object_local(Vector3.FORWARD, barrel_spin_speed * _spin * delta)
 
 ## Direction the barrel is actually pointing (world space)
@@ -127,6 +162,8 @@ func barrel_direction() -> Vector3:
 # ---------------------------------------------------------------- AI
 
 func _ai_tick(delta: float) -> void:
+	_ai_wants_spin = false
+	_ai_can_shoot = false
 	_scan_timer -= delta
 	if _scan_timer <= 0.0:
 		_scan_timer = ai_scan_interval
@@ -145,9 +182,11 @@ func _ai_tick(delta: float) -> void:
 		_bursting = not _bursting
 		_burst_timer = ai_burst_time if _bursting else ai_pause_time * randf_range(0.7, 1.3)
 
-	if _bursting and _cooldown <= 0.0 and error_deg <= ai_max_aim_error_deg \
-			and not _friendly_near_line(muzzle.global_position, aim_point):
-		_fire(ai_spread_deg)
+	# Spin up during a burst while swinging onto the target; only shoot
+	# once roughly on it and the lane is clear
+	_ai_wants_spin = _bursting
+	_ai_can_shoot = _bursting and error_deg <= ai_max_aim_error_deg \
+		and not _friendly_near_line(muzzle.global_position, aim_point)
 
 ## Untyped on purpose: the old target may already be freed, and a freed
 ## object can't be passed into a `Troop`-typed parameter
@@ -218,7 +257,7 @@ func _slew_toward(world_point: Vector3, speed_deg: float, delta: float) -> float
 
 func _fire(spread_deg: float) -> void:
 	_cooldown = 1.0 / fire_rate
-	_spin = 1.0
+	fired.emit()
 	var from := muzzle.global_position
 	var dir := _apply_spread(barrel_direction(), deg_to_rad(spread_deg))
 	var end := from + dir * max_range

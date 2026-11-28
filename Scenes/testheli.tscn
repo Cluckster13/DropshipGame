@@ -10,8 +10,20 @@
 [ext_resource type="Script" uid="uid://d4iix0xfovypl" path="res://Scenes/door_gun.gd" id="7_1qnl8"]
 [ext_resource type="PackedScene" uid="uid://b8e5eya8fgpm2" path="res://Scenes/loading_trigger.tscn" id="7_y27xj"]
 [ext_resource type="Script" uid="uid://dcc7c6josmxe2" path="res://Scenes/gunner_controller.gd" id="8_gk8nd"]
+[ext_resource type="Script" uid="uid://bq2n71aj1mimf" path="res://Scenes/gun_audio.gd" id="10_rjxrg"]
+[ext_resource type="AudioStream" uid="uid://8po2gds88udn" path="res://Assets/Sounds/Helicopter/MinigunFire3.wav" id="11_6j7xe"]
 [ext_resource type="PackedScene" uid="uid://b043fgdbo55gh" path="res://Scenes/FlightHUD.tscn" id="11_gqdeq"]
+[ext_resource type="AudioStream" uid="uid://d4ebotjhuahvd" path="res://Assets/Sounds/Helicopter/GUNAuto_Minigun machine gun fire_GfxSounds_MilitaryWarfare.wav" id="11_n14qw"]
+[ext_resource type="AudioStream" uid="uid://mcrbfbdf7nxo" path="res://Assets/Sounds/Helicopter/GUNAuto_Minigun machine gun fire 2_GfxSounds_MilitaryWarfare.wav" id="12_6j7xe"]
 [ext_resource type="Script" uid="uid://3auoxnhqnsvp" path="res://Scenes/sling_hook.gd" id="12_sling"]
+[ext_resource type="AudioStream" uid="uid://pstnqi7t027c" path="res://Assets/Sounds/Helicopter/GUNAuto_Minigun windup starting_GfxSounds_MilitaryWarfare.wav" id="13_3f8wy"]
+[ext_resource type="Script" uid="uid://chrkqpb8jvq7j" path="res://Scenes/heli_audio.gd" id="13_8vjsc"]
+[ext_resource type="AudioStream" uid="uid://c2v2u4w086gs6" path="res://Assets/Sounds/Helicopter/AEROMil_Military helicopter engines chopper start 2_GfxSounds_MilitaryWarfare.wav" id="13_f7xgt"]
+[ext_resource type="AudioStream" uid="uid://50vq4l2b8s5m" path="res://Assets/Sounds/Helicopter/AEROMil_Military helicopter idle engine loop_GfxSounds_MilitaryWarfare.wav" id="14_8vjsc"]
+[ext_resource type="AudioStream" uid="uid://cg7gk71d1ysvp" path="res://Assets/Sounds/Helicopter/GUNAuto_Minigun shutting down_GfxSounds_MilitaryWarfare.wav" id="14_acrn3"]
+[ext_resource type="AudioStream" uid="uid://cwruq3bpdnq7" path="res://Assets/Sounds/Helicopter/AEROMil_Troop transport helicopter entering the cabin 3_GfxSounds_MilitaryWarfare.wav" id="15_rpdq3"]
+[ext_resource type="AudioStream" uid="uid://8q250sgv8ck8" path="res://Assets/Sounds/Helicopter/AEROMil_Troop transport helicopter entering the cabin 4_GfxSounds_MilitaryWarfare.wav" id="16_f7ag5"]
+[ext_resource type="AudioStream" uid="uid://gcfcvam2efyv" path="res://Assets/Sounds/Helicopter/AEROMil_Troop transport helicopter flying forward 2_GfxSounds_MilitaryWarfare.wav" id="17_gr85x"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_etpvc"]
 size = Vector3(5.5733643, 5.1016846, 25.402832)
@@ -35,6 +47,7 @@ script = ExtResource("1_m8arb")
 pitch_rate_deg = 40.0
 roll_rate_deg = 30.0
 yaw_rate_deg = 20.0
+rotor_spool_up_rate = 30.0
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1881279923]
 transform = Transform3D(-1, 2.0813246e-08, -8.4909075e-08, 0, 0.9712466, 0.2380758, 8.742278e-08, 0.2380758, -0.9712466, 0.03514242, 8.594946, -17.02816)
@@ -141,6 +154,29 @@ minigun_mesh = ExtResource("5_88xxk")
 minigun_mesh_offset = Vector3(0.16, -0.2, 0)
 minigun_mesh_rotation_deg = Vector3(0, 90, 0)
 
+[node name="GunAudio" type="Node3D" parent="DoorGunLeft" unique_id=1500067999 node_paths=PackedStringArray("gun", "fire_loops", "windup", "shutdown")]
+script = ExtResource("10_rjxrg")
+gun = NodePath("..")
+fire_loops = [NodePath("Fire1"), NodePath("Fire2")]
+windup = NodePath("Windup")
+shutdown = NodePath("Shutdown")
+
+[node name="Fire1" type="AudioStreamPlayer3D" parent="DoorGunLeft/GunAudio" unique_id=155993647]
+stream = ExtResource("11_6j7xe")
+volume_db = -15.0
+
+[node name="Fire2" type="AudioStreamPlayer3D" parent="DoorGunLeft/GunAudio" unique_id=1821399633]
+stream = ExtResource("11_6j7xe")
+volume_db = -15.0
+
+[node name="Windup" type="AudioStreamPlayer3D" parent="DoorGunLeft/GunAudio" unique_id=1727314624]
+stream = ExtResource("13_3f8wy")
+unit_size = 15.0
+
+[node name="Shutdown" type="AudioStreamPlayer3D" parent="DoorGunLeft/GunAudio" unique_id=444756161]
+stream = ExtResource("14_acrn3")
+unit_size = 15.0
+
 [node name="DoorGunRight" type="Node3D" parent="." unique_id=891399034]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.75, 2.6, 6.8224773)
 script = ExtResource("7_1qnl8")
@@ -151,6 +187,29 @@ axle_mesh_rotation_deg = Vector3(0, 90, 0)
 minigun_mesh = ExtResource("5_88xxk")
 minigun_mesh_offset = Vector3(0.16, -0.2, 0)
 minigun_mesh_rotation_deg = Vector3(0, 90, 0)
+
+[node name="GunAudio" type="Node3D" parent="DoorGunRight" unique_id=1090904237 node_paths=PackedStringArray("gun", "fire_loops", "windup", "shutdown")]
+script = ExtResource("10_rjxrg")
+gun = NodePath("..")
+fire_loops = [NodePath("Fire1"), NodePath("Fire2")]
+windup = NodePath("Windup")
+shutdown = NodePath("Shutdown")
+
+[node name="Fire1" type="AudioStreamPlayer3D" parent="DoorGunRight/GunAudio" unique_id=786547175]
+stream = ExtResource("11_n14qw")
+unit_size = 25.0
+
+[node name="Fire2" type="AudioStreamPlayer3D" parent="DoorGunRight/GunAudio" unique_id=441853748]
+stream = ExtResource("12_6j7xe")
+unit_size = 25.0
+
+[node name="Windup" type="AudioStreamPlayer3D" parent="DoorGunRight/GunAudio" unique_id=669839824]
+stream = ExtResource("13_3f8wy")
+unit_size = 15.0
+
+[node name="Shutdown" type="AudioStreamPlayer3D" parent="DoorGunRight/GunAudio" unique_id=154914316]
+stream = ExtResource("14_acrn3")
+unit_size = 15.0
 
 [node name="Gunner" type="Node" parent="." unique_id=1017252988 node_paths=PackedStringArray("guns", "orbit_camera")]
 script = ExtResource("8_gk8nd")
@@ -173,5 +232,39 @@ mesh = SubResource("BoxMesh_rope")
 surface_material_override/0 = SubResource("StandardMaterial3D_rope")
 
 [node name="FlightHUD" parent="." unique_id=831605873 instance=ExtResource("11_gqdeq")]
+
+[node name="Audio" type="Node3D" parent="." unique_id=4650066 node_paths=PackedStringArray("aircraft", "start", "idle", "forward", "cabin_sounds")]
+script = ExtResource("13_8vjsc")
+aircraft = NodePath("..")
+start = NodePath("BlackhawkStart")
+idle = NodePath("BlackhawkIdle")
+forward = NodePath("BlackhawkForward")
+cabin_sounds = [NodePath("EnterCabin1"), NodePath("EnterCabin2")]
+
+[node name="BlackhawkStart" type="AudioStreamPlayer3D" parent="Audio" unique_id=1768226309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7297254, 4.130621)
+stream = ExtResource("13_f7xgt")
+unit_size = 30.0
+doppler_tracking = 2
+
+[node name="BlackhawkIdle" type="AudioStreamPlayer3D" parent="Audio" unique_id=21962708]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7297254, 4.130621)
+stream = ExtResource("14_8vjsc")
+unit_size = 30.0
+doppler_tracking = 2
+
+[node name="EnterCabin1" type="AudioStreamPlayer3D" parent="Audio" unique_id=260124623]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7593808, 4.4981627)
+stream = ExtResource("15_rpdq3")
+
+[node name="EnterCabin2" type="AudioStreamPlayer3D" parent="Audio" unique_id=1273904838]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7593808, 4.4981627)
+stream = ExtResource("16_f7ag5")
+
+[node name="BlackhawkForward" type="AudioStreamPlayer3D" parent="Audio" unique_id=1179414260]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7297254, 4.130621)
+stream = ExtResource("17_gr85x")
+unit_size = 30.0
+doppler_tracking = 2
 
 [editable path="BlackhawkV2"]

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://d4ebotjhuahvd"
+path="res://.godot/imported/GUNAuto_Minigun machine gun fire_GfxSounds_MilitaryWarfare.wav-a7cd9ed4740af4cad6de3ed17baf169c.sample"
+
+[deps]
+
+source_file="res://Assets/Sounds/Helicopter/GUNAuto_Minigun machine gun fire_GfxSounds_MilitaryWarfare.wav"
+dest_files=["res://.godot/imported/GUNAuto_Minigun machine gun fire_GfxSounds_MilitaryWarfare.wav-a7cd9ed4740af4cad6de3ed17baf169c.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=false
+edit/loop_mode=2
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

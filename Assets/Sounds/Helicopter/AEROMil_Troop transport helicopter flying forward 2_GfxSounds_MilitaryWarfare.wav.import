@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://gcfcvam2efyv"
+path="res://.godot/imported/AEROMil_Troop transport helicopter flying forward 2_GfxSounds_MilitaryWarfare.wav-3289465db49460704e0c591bfc0b9611.sample"
+
+[deps]
+
+source_file="res://Assets/Sounds/Helicopter/AEROMil_Troop transport helicopter flying forward 2_GfxSounds_MilitaryWarfare.wav"
+dest_files=["res://.godot/imported/AEROMil_Troop transport helicopter flying forward 2_GfxSounds_MilitaryWarfare.wav-3289465db49460704e0c591bfc0b9611.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=2
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

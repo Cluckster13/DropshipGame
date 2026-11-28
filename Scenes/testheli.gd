@@ -168,6 +168,9 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("EngineToggle") and not event.is_echo() and not is_destroyed:
 		engine_on = !engine_on
+		$Audio/BlackhawkStart.play()
+		await get_tree().create_timer(23.40).timeout
+		$Audio/BlackhawkIdle.play()
 
 func _read_input(delta: float) -> void:
 	var flying := engine_on and not is_destroyed
